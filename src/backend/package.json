@@ -1,0 +1,22 @@
+{
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.14.1",
+    "redis": "^4.7.0",
+    "rethinkdb": "^2.4.2",
+    "socket.io": "^4.8.1",
+    "ts-node": "^10.9.2",
+    "uuid": "^11.1.0"
+  },
+  "scripts": {
+    "start": "ts-node ./server.ts"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/pg": "^8.11.11",
+    "@types/rethinkdb": "^2.3.21"
+  }
+}
