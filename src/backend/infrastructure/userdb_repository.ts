@@ -14,8 +14,8 @@ export class PostgreSQLUserRepository implements UserRepository {
 	}
 	async addUser(user: User): Promise<void> {
 		await this.pool.query(
-			"INSERT INTO users(id, name, email) VALUES($1, $2, $3)",
-			[user.id, user.name, user.email]
+			"INSERT INTO users(name, email, password) VALUES($1, $2, $3)",
+			[user.name, user.email, user.password]
 		);
 	}
 	async getUserById(id: string): Promise<UserDTO | null> {
@@ -33,7 +33,7 @@ export class PostgreSQLUserRepository implements UserRepository {
 	}
 	async getUserByIdAuth(id: string): Promise<User | null> {
 		const result = await this.pool.query(
-			"SELECT id, name, email FROM users WHERE id = $1",
+			"SELECT id, name, email, password FROM users WHERE id = $1",
 			[id]
 		);
 
@@ -59,7 +59,7 @@ export class PostgreSQLUserRepository implements UserRepository {
 	}
 	async getUserByEmailAuth(name: string): Promise<User | null> {
 		const result = await this.pool.query(
-			"SELECT id, name, email FROM users WHERE email = $1",
+			"SELECT id, name, email, password FROM users WHERE email = $1",
 			[name]
 		);
 
@@ -72,7 +72,7 @@ export class PostgreSQLUserRepository implements UserRepository {
 	}
 	async getUserByNameAuth(name: string): Promise<User | null> {
 		const result = await this.pool.query(
-			"SELECT id, name, email FROM users WHERE name = $1",
+			"SELECT id, name, email, password FROM users WHERE name = $1",
 			[name]
 		);
 

@@ -9,6 +9,7 @@ export function createAuthRouter(userService: UserService, authService: AuthServ
 
     router.post("/login", async (req, res) => {
         try {
+            console.log(req.body)
             const { email, password } = req.body;
             const token = await authService.login(email, password);
 
@@ -17,8 +18,9 @@ export function createAuthRouter(userService: UserService, authService: AuthServ
             res.status(401).json({ error: error instanceof Error ? error.message : 'Login failed' });
         }
     });
-    router.post("/register", async (req, res) => {
+    router.post("/registration", async (req, res) => {
         try {
+            console.log(req)
             const { name, email, password } = req.body;
 
             // Хеширование пароля
@@ -44,6 +46,7 @@ export function createAuthRouter(userService: UserService, authService: AuthServ
                 token
             });
         } catch (error) {
+            console.log(error)
             res.status(400).json({
                 error: error instanceof Error ? error.message : 'Registration failed'
             });

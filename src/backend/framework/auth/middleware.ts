@@ -15,7 +15,7 @@ export function authenticateJWT(req: AuthenticatedRequest, res: Response, next: 
     const token = authHeader.split(' ')[1];
 
     try {
-        const verified = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+        const verified = jwt.verify(token, "secret") as JwtPayload;
         req.user = verified;
         next();
     } catch (err) {

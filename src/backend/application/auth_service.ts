@@ -7,9 +7,8 @@ export class AuthService {
     constructor(private userRepo: PostgreSQLUserRepository) { }
 
     async login(email: string, password: string) {
-        const user = await this.userRepo.getUserByNameAuth(email);
+        const user = await this.userRepo.getUserByEmailAuth(email);
         if (!user) throw new Error('User not found');
-
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) throw new Error('Invalid password');
 
