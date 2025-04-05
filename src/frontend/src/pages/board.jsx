@@ -1,15 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { Stage, Layer, Text, Rect } from "react-konva";
 import { socket } from "../socket";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { checkAuth } from "../components/protectedRoute";
 
 
 export function Board() {
 	const { boardId } = useParams(); // Получаем ID доски из URL
 	const [elements, setElements] = useState([]);
 	const [isConnected, setIsConnected] = useState(false);
+	const navigate = useNavigate();
 
 	useEffect(() => {
+		// Проверяем аутентификацию при загрузке компонента
+		const verifyAuth = async () => {
+			const isAuthenticated = await checkAuth();
+			if (!isAuthenticated) {
+				navigate('/login');
+				return;
+			}
+		};
+
+		verifyAuth();
 		const onConnect = () => {
 			setIsConnected(true);
 			socket.emit("join-board", boardId);
@@ -58,7 +70,7 @@ export function Board() {
 			socket.off("element-deleted", handleElementDeleted);
 			socket.emit("leave-board", boardId);
 		};
-	}, [boardId]);
+	}, [boardId, navigate]);
 
 	const handleCreateElement = (element) => {
 		console.log(isConnected)

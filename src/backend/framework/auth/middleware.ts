@@ -6,13 +6,8 @@ interface AuthenticatedRequest extends Request {
 }
 
 export function authenticateJWT(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-    const authHeader = req.header('Authorization');
-
-    if (!authHeader?.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Unauthorized' });
-    }
-
-    const token = authHeader.split(' ')[1];
+    console.log(req.cookies)
+    const token = req.cookies.jwt;
 
     try {
         const verified = jwt.verify(token, "secret") as JwtPayload;

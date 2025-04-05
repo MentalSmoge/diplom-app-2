@@ -9,6 +9,7 @@ import { Board } from "./pages/board";
 import Users from "./pages/users";
 import { Login } from "./pages/login";
 import { Register } from "./pages/register";
+import ProtectedRoute from "./components/protectedRoute";
 
 function App() {
 
@@ -35,10 +36,12 @@ function App() {
 
           <Routes>
             <Route path="/" element={<Navigate to="/board" />} />
-            <Route path="/board/:boardId" element={<Board />} />
             <Route path="/user" element={<Users />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/board/:boardId" element={<Board />} />
+            </Route>
           </Routes>
         </div>
       </Router>

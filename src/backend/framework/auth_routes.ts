@@ -3,17 +3,23 @@ import bcrypt from 'bcryptjs';
 import { UserService } from "../application/user_service";
 import { AuthService } from "../application/auth_service";
 import { User } from "../domain/user";
+import { authenticateJWT } from "./auth/middleware";
 
 export function createAuthRouter(userService: UserService, authService: AuthService) {
     const router = express.Router();
 
     router.post("/login", async (req, res) => {
         try {
-            console.log(req.body)
             const { email, password } = req.body;
             const token = await authService.login(email, password);
+            res.cookie('jwt', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 24 * 60 * 60 * 1000 // 1 день
+            });
 
-            res.status(200).json({ token });
+            res.status(200).json({ message: 'Login successful' });
         } catch (error) {
             res.status(401).json({ error: error instanceof Error ? error.message : 'Login failed' });
         }
@@ -52,6 +58,8 @@ export function createAuthRouter(userService: UserService, authService: AuthServ
             });
         }
     });
-
+    router.get('/check-auth', authenticateJWT, (req, res) => {
+        res.status(200).json({ authenticated: true });
+    });
     return router;
 }

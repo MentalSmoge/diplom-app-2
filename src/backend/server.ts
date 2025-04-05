@@ -18,14 +18,22 @@ import { createUserRouter } from "./framework/routes";
 import { redisClient } from "./infrastructure/redis_client";
 import { createAuthRouter } from "./framework/auth_routes";
 import { AuthService } from "./application/auth_service";
+import cookieParser from 'cookie-parser';
 
 const port = process.env.USERS_PORT || 8080;
 const app = express();
-app.use(cors());
+const corsOptions = {
+    origin: 'http://localhost:3000', // Указываем конкретный origin
+    credentials: true, // Разрешаем передачу кук
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Разрешенные методы
+    allowedHeaders: ['Content-Type', 'Authorization'] // Разрешенные заголовки
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
+const io = new Server(server, { cors: corsOptions });
 async function startUsersServer() {
+    app.use(cookieParser());
     // Инициализация PostgreSQL
     const pool = createPool();
     const userRepository = new PostgreSQLUserRepository(pool);
@@ -51,6 +59,7 @@ async function startUsersServer() {
     new WebSocketController(io, elementService, boardService);
     app.use("/", createUserRouter(userService));
     app.use("/", createAuthRouter(userService, authService)); // или другой путь, соответствующий вашему API
+
 
     // Запуск сервера
     app.listen(port, () => console.log(`Users server running on port ${port}`));
