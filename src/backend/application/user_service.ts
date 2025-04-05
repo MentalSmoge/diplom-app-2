@@ -38,6 +38,20 @@ export class UserService {
 		return user;
 	}
 
+	async getUserByEmail(email: string): Promise<UserDTO | null> {
+		const cacheKey = `user:${email}`;
+		const cachedUser = await this.redisClient.get(cacheKey);
+		if (cachedUser) {
+			console.log("Cached " + email)
+			return JSON.parse(cachedUser);
+		}
+		const user = await this.userRepository.getUserByEmailAuth(email);
+		if (!user) return null;
+
+		await this.redisClient.setEx(cacheKey, 300, JSON.stringify(user));
+		return user;
+	}
+
 	// Получение всех пользователей
 	async getAllUsers(): Promise<UserDTO[]> {
 		const cacheKey = "users:all";

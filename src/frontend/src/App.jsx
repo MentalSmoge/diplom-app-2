@@ -1,38 +1,18 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Link,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Board } from "./pages/board";
 import Users from "./pages/users";
 import { Login } from "./pages/login";
 import { Register } from "./pages/register";
 import ProtectedRoute from "./components/protectedRoute";
+import { UserProvider } from "./components/userContext";
+import { Header } from "./components/header";
 
 function App() {
-
   return (
-    <>
+    <UserProvider>
       <Router>
         <div className="App">
-          <nav>
-            <ul>
-              <li>
-                <Link to="/board">Board</Link>
-              </li>
-              <li>
-                <Link to="/user">Users</Link>
-              </li>
-              <li>
-                <Link to="/login">Login</Link>
-              </li>
-              <li>
-                <Link to="/register">Register</Link>
-              </li>
-            </ul>
-          </nav>
+          <Header />
 
           <Routes>
             <Route path="/" element={<Navigate to="/board" />} />
@@ -45,8 +25,8 @@ function App() {
           </Routes>
         </div>
       </Router>
-    </>
+    </UserProvider>
   )
 }
 
-export default App
+export default App;

@@ -22,6 +22,7 @@ export interface UserRepository {
 	getUserByIdAuth(id: string): Promise<User | null>;
 	getUserByName(name: string): Promise<UserDTO | null>;
 	getUserByNameAuth(name: string): Promise<User | null>;
+	getUserByEmail(name: string): Promise<UserDTO | null>;
 	getUserByEmailAuth(name: string): Promise<User | null>;
 	getAllUsers(): Promise<UserDTO[]>;
 	updateUser(UserDTO: User): Promise<void>;

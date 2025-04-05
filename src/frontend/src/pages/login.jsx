@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../components/userContext';
 
 export const Login = () => {
     const [email, setEmail] = useState('');
@@ -7,6 +8,7 @@ export const Login = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const { login } = useUser();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -25,8 +27,8 @@ export const Login = () => {
                 throw new Error('Invalid credentials');
             }
 
-            const { token } = await response.json();
-            localStorage.setItem('token', token);
+            const data = await response.json();
+            login({ username: data.username, email: data.email });
             navigate('/');
         } catch (err) {
             setError(err.message || 'Login failed');

@@ -18,8 +18,8 @@ export function createAuthRouter(userService: UserService, authService: AuthServ
                 sameSite: 'strict',
                 maxAge: 24 * 60 * 60 * 1000 // 1 день
             });
-
-            res.status(200).json({ message: 'Login successful' });
+            const user = await userService.getUserByEmail(email)
+            await res.status(200).json({ message: 'Login successful', name: user?.name, email: user?.email });
         } catch (error) {
             res.status(401).json({ error: error instanceof Error ? error.message : 'Login failed' });
         }

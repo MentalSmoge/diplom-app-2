@@ -70,6 +70,19 @@ export class PostgreSQLUserRepository implements UserRepository {
 		const userData = result.rows[0];
 		return new User(userData.id, userData.name, userData.email, userData.password);
 	}
+	async getUserByEmail(email: string): Promise<UserDTO | null> {
+		const result = await this.pool.query(
+			"SELECT id, name, email FROM users WHERE email = $1",
+			[email]
+		);
+
+		if (result.rows.length === 0) {
+			return null;
+		}
+
+		const userData = result.rows[0];
+		return toUserDTO(userData);
+	}
 	async getUserByNameAuth(name: string): Promise<User | null> {
 		const result = await this.pool.query(
 			"SELECT id, name, email, password FROM users WHERE name = $1",
