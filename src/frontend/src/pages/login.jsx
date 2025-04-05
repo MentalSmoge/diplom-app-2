@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '../components/userContext';
+import { observer } from 'mobx-react';
+import { userStore } from '../stores/userStore';
 
-export const Login = () => {
+export const Login = observer(() => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const { login } = useUser();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -27,8 +27,8 @@ export const Login = () => {
                 throw new Error('Invalid credentials');
             }
 
-            const data = await response.json();
-            login({ username: data.username, email: data.email });
+            const userData = await response.json();
+            userStore.setUser(userData);
             navigate('/');
         } catch (err) {
             setError(err.message || 'Login failed');
@@ -73,4 +73,4 @@ export const Login = () => {
             </p>
         </div>
     );
-};
+});

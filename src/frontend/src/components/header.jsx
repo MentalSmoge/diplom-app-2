@@ -1,13 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useUser } from './userContext';
+import { userStore } from '../stores/userStore';
+import { observer } from 'mobx-react';
 
-export function Header() {
-    const { user, logout } = useUser();
+export const Header = observer(() => {
 
-    const handleLogout = () => {
-        logout();
-        // Дополнительно: вызвать API для выхода из системы
+    const handleLogout = async () => {
+        const response = await fetch('http://localhost:8080/logout', {
+            method: 'POST',
+            credentials: 'include',
+        });
+        userStore.clearUser();
     };
 
     return (
@@ -22,17 +25,23 @@ export function Header() {
                 <ul style={{ display: 'flex', listStyle: 'none', gap: '1rem' }}>
                     <li><Link to="/board">Board</Link></li>
                     <li><Link to="/user">Users</Link></li>
-                    {!user && <li><Link to="/login">Login</Link></li>}
-                    {!user && <li><Link to="/register">Register</Link></li>}
+                    {!userStore.isAuthenticated && <li><Link to="/login">Login</Link></li>}
+                    {!userStore.isAuthenticated && <li><Link to="/register">Register</Link></li>}
                 </ul>
             </nav>
 
-            {user && (
+            {userStore.isAuthenticated && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <span>Hello, {user.username}</span>
-                    <button onClick={handleLogout}>Logout</button>
+                    {userStore.isLoading ? (
+                        <span>Loading...</span>
+                    ) : (
+                        <>
+                            <span>Hello, {userStore.user?.name}</span>
+                            <button onClick={handleLogout}>Logout</button>
+                        </>
+                    )}
                 </div>
             )}
         </header>
     );
-}
+})

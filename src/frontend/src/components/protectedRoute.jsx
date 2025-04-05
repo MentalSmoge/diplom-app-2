@@ -1,22 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { checkAuth } from '../api/auth';
+import { observer } from 'mobx-react';
+import { userStore } from '../stores/userStore';
 
-const ProtectedRoute = () => {
+const ProtectedRoute = observer(() => {
+    useEffect(() => {
+        if (!userStore.isAuthenticated) {
+            userStore.checkAuth();
+        }
+    }, []);
+    if (userStore.isLoading) {
+        return <div>Checking authentication...</div>;
+    }
     const isAuthenticated = checkAuth(); // Функция проверки аутентификации
 
     return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
-};
 
-// Функция для проверки аутентификации
-export const checkAuth = async () => {
-    try {
-        const response = await fetch('http://localhost:8080/check-auth', {
-            credentials: 'include', // Отправляем куки
-        });
-        return response.ok;
-    } catch (error) {
-        return false;
-    }
-};
+});
+
 
 export default ProtectedRoute;

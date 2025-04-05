@@ -58,8 +58,14 @@ export function createAuthRouter(userService: UserService, authService: AuthServ
             });
         }
     });
-    router.get('/check-auth', authenticateJWT, (req, res) => {
-        res.status(200).json({ authenticated: true });
+    router.get('/check-auth', authenticateJWT, async (req, res) => {
+        // @ts-ignore
+        const user_data = await userService.getUserById(req.user?.userId)
+        res.status(200).json({ authenticated: true, data: user_data });
+    });
+    router.post('/logout', (req, res) => {
+        res.clearCookie('jwt');
+        res.status(200).json({ success: true });
     });
     return router;
 }

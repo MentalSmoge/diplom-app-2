@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Stage, Layer, Text, Rect } from "react-konva";
 import { socket } from "../socket";
 import { useParams, useNavigate } from "react-router-dom";
-import { checkAuth } from "../components/protectedRoute";
+import { checkAuth } from "../api/auth";
 
 
 export function Board() {

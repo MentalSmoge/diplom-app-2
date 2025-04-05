@@ -6,7 +6,6 @@ interface AuthenticatedRequest extends Request {
 }
 
 export function authenticateJWT(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-    console.log(req.cookies)
     const token = req.cookies.jwt;
 
     try {
