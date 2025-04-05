@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const port = 8080;
+const port = 8082;
 const URL = `http://localhost:${port}`;
 
 export const socket = io(URL, {

@@ -54,6 +54,9 @@ async function startUsersServer() {
 
     // Запуск сервера
     app.listen(port, () => console.log(`Users server running on port ${port}`));
+    server.listen(8082, () =>
+        console.log(`Editor server running on port 8082`)
+    );
 }
 
 startUsersServer().catch((err) => {
