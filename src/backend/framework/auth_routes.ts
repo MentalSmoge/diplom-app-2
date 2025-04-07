@@ -4,8 +4,9 @@ import { UserService } from "../application/user_service";
 import { AuthService } from "../application/auth_service";
 import { User } from "../domain/user";
 import { authenticateJWT } from "./auth/middleware";
+import { BoardService } from "../application/board_service";
 
-export function createAuthRouter(userService: UserService, authService: AuthService) {
+export function createAuthRouter(userService: UserService, authService: AuthService, boardService: BoardService) {
     const router = express.Router();
 
     router.post("/login", async (req, res) => {
@@ -62,6 +63,14 @@ export function createAuthRouter(userService: UserService, authService: AuthServ
         // @ts-ignore
         const user_data = await userService.getUserById(req.user?.userId)
         res.status(200).json({ authenticated: true, data: user_data });
+    });
+    router.get('/check-board-access/:boardId', authenticateJWT, async (req, res) => {
+        // @ts-ignore
+        console.log(req.user?.userId)
+        console.log(req.params.boardId)
+        // @ts-ignore
+        const access_level = await boardService.checkUserAccessToBoard(req.user?.userId, parseInt(req.params.boardId))
+        res.status(200).json({ data: access_level });
     });
     router.post('/logout', (req, res) => {
         res.clearCookie('jwt');

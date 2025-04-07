@@ -58,7 +58,7 @@ async function startUsersServer() {
 
     new WebSocketController(io, elementService, boardService);
     app.use("/", createUserRouter(userService));
-    app.use("/", createAuthRouter(userService, authService));
+    app.use("/", createAuthRouter(userService, authService, boardService));
     app.use("/", createBoardRouter(boardService));
 
 

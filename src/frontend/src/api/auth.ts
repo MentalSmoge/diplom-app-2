@@ -15,6 +15,23 @@ export const checkAuth = async () => {
     }
 };
 
+export const checkBoardAccess = async (boardId: number) => {
+    try {
+        const response = await fetch(`http://localhost:8080/check-board-access/${boardId}`, {
+            credentials: 'include',
+        });
+
+        if (!response.ok) {
+            throw new Error('Not authenticated');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Auth check failed:', error);
+        return null;
+    }
+};
+
 export const logout = async () => {
     try {
         await fetch('http://localhost:8080/logout', {

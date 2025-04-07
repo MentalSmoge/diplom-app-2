@@ -39,6 +39,21 @@ export class PostgreSQLBoardRepository implements BoardRepository {
 
         return result.rows;
     }
+    async getUserAccessToBoard(userId: number, boardId: number): Promise<string> {
+        const result = await this.pool.query(
+            `SELECT access_level
+            FROM board_accesses
+            WHERE user_id = $1 AND board_id = $2;
+            `,
+            [userId, boardId]
+        );
+
+        if (result.rows.length === 0) {
+            return "no";
+        }
+
+        return result.rows[0].access_level;
+    }
 
     async getAllBoards(): Promise<Board[]> {
         const result = await this.pool.query(

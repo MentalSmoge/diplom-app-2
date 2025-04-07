@@ -22,7 +22,21 @@ export class BoardService {
         return board;
     }
 
-    async getBoardByUserId(userId: number): Promise<Board[] | null> {
+    async checkUserAccessToBoard(userId: number, boardId: number): Promise<number> {
+        const access_level = await this.boardRepository.getUserAccessToBoard(userId, boardId);
+        console.log("access_level")
+        console.log(access_level)
+        if (access_level === "no") {
+            return 0;
+        }
+        if (access_level === "editor") {
+            return 3;
+        }
+        return 0
+    }
+
+
+    async getBoardsByUserId(userId: number): Promise<Board[] | null> {
         const boards = await this.boardRepository.getBoardsByUserId(userId);
         if (!boards) return null;
         return boards;

@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { checkAuth } from "../api/auth";
+import { useNavigate } from "react-router-dom";
 
 function Boards() {
     const [boards, setBoards] = useState([]);
+    const navigate = useNavigate();
 
 
+    const handleBoardButton = (boardId) => {
+        navigate(`/boards/${boardId}`);
+    }
     useEffect(() => {
         const verifyAuth = async () => {
             const isAuthenticated = await checkAuth();
@@ -26,7 +31,7 @@ function Boards() {
             <h1>Boards</h1>
             <ul>
                 {boards.map((board) => (
-                    <li key={board.id}>id = {board.id}, title = {board.title}, access level = {board.access_level}</li>
+                    <li key={board.id}>id = {board.id}, title = {board.title}, access level = {board.access_level}<button onClick={() => handleBoardButton(board.id)}>Open</button></li>
                 ))}
             </ul>
         </div>

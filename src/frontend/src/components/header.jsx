@@ -23,7 +23,7 @@ export const Header = observer(() => {
         }}>
             <nav>
                 <ul style={{ display: 'flex', listStyle: 'none', gap: '1rem' }}>
-                    <li><Link to="/board">Board</Link></li>
+                    <li><Link to="/boards">Board</Link></li>
                     <li><Link to="/user">Users</Link></li>
                     {!userStore.isAuthenticated && <li><Link to="/login">Login</Link></li>}
                     {!userStore.isAuthenticated && <li><Link to="/register">Register</Link></li>}

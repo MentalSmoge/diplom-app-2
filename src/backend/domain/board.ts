@@ -5,6 +5,7 @@ export interface BoardRepository {
     addBoard(board: Board): Promise<void>;
     getBoardById(id: number): Promise<Board | null>;
     getBoardsByUserId(userId: number): Promise<Board[] | null>;
+    getUserAccessToBoard(userId: number, boardId: number): Promise<string>;
     getAllBoards(): Promise<Board[]>;
     updateBoard(Board: Board): Promise<void>;
     deleteBoard(id: number): Promise<boolean>;

@@ -34,7 +34,7 @@ export function createBoardRouter(boardService: BoardService) {
 	router.get('/boards/:userId', async (req, res) => {
 		try {
 			const userId = req.params.userId;
-			const boards = await boardService.getBoardByUserId(parseInt(userId)); //TODO Сделать проверку на строку
+			const boards = await boardService.getBoardsByUserId(parseInt(userId)); //TODO Сделать проверку на строку
 			res.status(200).json(boards);
 		} catch (error) {
 			res.status(500).json({ error: `${error}` });
