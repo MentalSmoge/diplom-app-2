@@ -6,6 +6,7 @@ import { Register } from "./pages/register";
 import ProtectedRoute from "./components/protectedRoute";
 import { UserProvider } from "./components/userContext";
 import { Header } from "./components/header";
+import Boards from "./pages/boards";
 
 function App() {
   return (
@@ -20,7 +21,8 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route element={<ProtectedRoute />}>
-              <Route path="/board/:boardId" element={<Board />} />
+              <Route path="/boards" element={<Boards />} />
+              <Route path="/boards/:boardId" element={<Board />} />
             </Route>
           </Routes>
         </div>

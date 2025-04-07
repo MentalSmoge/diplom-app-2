@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { PostgreSQLUserRepository } from '../infrastructure/userdb_repository';
+import { PostgreSQLUserRepository } from '../infrastructure/users_repository';
 import { User } from '../domain/user';
 
 export class AuthService {

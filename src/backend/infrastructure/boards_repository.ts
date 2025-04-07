@@ -1,38 +1,75 @@
-import * as r from "rethinkdb";
-import { BoardRepository, Board } from "../domain/board";
+import { Pool } from "pg";
+import { Board, BoardRepository } from "../domain/board";
 
-const rethinkConfig = {
-    host: process.env.RETHINKDB_HOST || "localhost",
-    port: process.env.RETHINKDB_PORT ? Number(process.env.RETHINKDB_PORT) : 28015,
-    db: process.env.RETHINKDB_NAME || "rethink",
-    table: "boards",
-};
+export class PostgreSQLBoardRepository implements BoardRepository {
+    constructor(private pool: InstanceType<typeof Pool>) { }
 
-export class RethinkDBBoardRepository implements BoardRepository {
-    constructor(private connection: r.Connection) { }
+    async addBoard(board: Board): Promise<void> {
+        await this.pool.query(
+            "INSERT INTO boards(id, title, project_id) VALUES($1, $2, $3)",
+            [board.id, board.title, board.project_id]
+        );
+    }
 
-    async initialize(): Promise<void> {
-        const dbList = await r.dbList().run(this.connection);
-        if (!dbList.includes(rethinkConfig.db)) {
-            await r.dbCreate(rethinkConfig.db).run(this.connection);
+    async getBoardById(id: number): Promise<Board | null> {
+        const result = await this.pool.query(
+            "SELECT id, title, project_id FROM boards WHERE id = $1",
+            [id]
+        );
+
+        if (result.rows.length === 0) {
+            return null;
         }
 
-        const tableList = await r.db(rethinkConfig.db).tableList().run(this.connection);
-        if (!tableList.includes(rethinkConfig.table)) {
-            await r.db(rethinkConfig.db).tableCreate(rethinkConfig.table).run(this.connection);
+        return result.rows[0];
+    }
+
+    async getBoardsByUserId(userId: number): Promise<Board[] | null> {
+        const result = await this.pool.query(
+            `SELECT b.id, b.title, b.project_id, ba.access_level
+             FROM boards b
+             JOIN board_accesses ba ON b.id = ba.board_id
+             WHERE ba.user_id = $1`,
+            [userId]
+        );
+
+        if (result.rows.length === 0) {
+            return null;
         }
+
+        return result.rows;
     }
 
-    async loadInitialState(): Promise<Board[]> {
-        const cursor = await r.db(rethinkConfig.db).table(rethinkConfig.table).run(this.connection);
-        return cursor.toArray() as Promise<Board[]>;
+    async getAllBoards(): Promise<Board[]> {
+        const result = await this.pool.query(
+            'SELECT id, title, project_id FROM boards'
+        );
+
+        return result.rows;
     }
 
-    async saveBoard(board: Board): Promise<void> {
-        await r.db(rethinkConfig.db).table(rethinkConfig.table).insert(board, { conflict: "replace" }).run(this.connection);
+    async updateBoard(board: Board): Promise<void> {
+        await this.pool.query(
+            "UPDATE boards SET title = $1, project_id = $2 WHERE id = $3",
+            [board.title, board.project_id, board.id]
+        );
     }
 
-    async deleteBoard(boardId: string): Promise<void> {
-        await r.db(rethinkConfig.db).table(rethinkConfig.table).get(boardId).delete().run(this.connection);
+    async deleteBoard(id: number): Promise<boolean> {
+        const result = await this.pool.query(
+            "DELETE FROM boards WHERE id = $1",
+            [id]
+        );
+        return result.rowCount! > 0;
     }
+}
+
+export function createBoardPool(): InstanceType<typeof Pool> {
+    return new Pool({
+        user: process.env.DB_USER,
+        host: process.env.DB_HOST || "board_db",
+        database: process.env.DB_NAME,
+        password: process.env.DB_PASSWORD,
+        port: parseInt(process.env.DB_PORT!),
+    });
 }

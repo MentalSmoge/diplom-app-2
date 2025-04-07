@@ -6,19 +6,20 @@ import * as r from "rethinkdb";
 import { RethinkDBElementRepository } from "./infrastructure/elements_repository";
 import { ElementService } from "./application/element_service";
 import { WebSocketController } from "./framework/websocket_controller";
-import { RethinkDBBoardRepository } from "./infrastructure/boards_repository";
 import { BoardService } from "./application/board_service";
 
 import {
     createPool,
     PostgreSQLUserRepository,
-} from "./infrastructure/userdb_repository";
+} from "./infrastructure/users_repository";
 import { UserService } from "./application/user_service";
-import { createUserRouter } from "./framework/routes";
+import { createUserRouter } from "./framework/user_routes";
 import { redisClient } from "./infrastructure/redis_client";
 import { createAuthRouter } from "./framework/auth_routes";
 import { AuthService } from "./application/auth_service";
 import cookieParser from 'cookie-parser';
+import { PostgreSQLBoardRepository } from "./infrastructure/boards_repository";
+import { createBoardRouter } from "./framework/board_routes";
 
 const port = process.env.USERS_PORT || 8080;
 const app = express();
@@ -36,7 +37,6 @@ async function startUsersServer() {
     app.use(cookieParser());
     // Инициализация PostgreSQL
     const pool = createPool();
-    const userRepository = new PostgreSQLUserRepository(pool);
 
     // Инициализация RethinkDB
     const rethinkConnection = await r.connect({
@@ -47,18 +47,20 @@ async function startUsersServer() {
     });
     // Репозитории
     const elementRepository = new RethinkDBElementRepository(rethinkConnection);
-    const boardRepository = new RethinkDBBoardRepository(rethinkConnection);
+    const userRepository = new PostgreSQLUserRepository(pool);
+    const boardRepository = new PostgreSQLBoardRepository(pool);
     // Сервисы
     const userService = new UserService(userRepository, redisClient);
+    const boardService = new BoardService(boardRepository);
     const authService = new AuthService(userRepository);
     const elementService = new ElementService(elementRepository);
-    const boardService = new BoardService(boardRepository);
     await elementService.initialize();
-    await boardService.initialize();
 
     new WebSocketController(io, elementService, boardService);
     app.use("/", createUserRouter(userService));
-    app.use("/", createAuthRouter(userService, authService)); // или другой путь, соответствующий вашему API
+    app.use("/", createAuthRouter(userService, authService));
+    app.use("/", createBoardRouter(boardService));
+
 
 
     // Запуск сервера

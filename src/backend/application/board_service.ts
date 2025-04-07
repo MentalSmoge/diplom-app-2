@@ -1,49 +1,53 @@
-import { BoardRepository, Board } from '../domain/board';
+import { BoardRepository, Board, CreateBoardCommand, BoardDTO, UpdateBoardCommand } from '../domain/board';
 
 export class BoardService {
-    private boards: Board[] = [];
     constructor(private boardRepository: BoardRepository) { }
 
-    async initialize(): Promise<void> {
-        await this.boardRepository.initialize();
-        this.boards = await this.boardRepository.loadInitialState();
+    async createBoard(command: CreateBoardCommand): Promise<void> {
+        const board = new Board(0, command.title, "sas");
+        // await this.redisClient.del("boards:all");
+        await this.boardRepository.addBoard(board);
     }
 
+    async getBoardById(boardId: number): Promise<Board | null> {
+        // const cacheKey = `board:${boardId}`;
+        // const cachedBoard = await this.redisClient.get(cacheKey);
+        // if (cachedBoard) {
+        //     console.log("Cached " + boardId)
+        //     return JSON.parse(cachedBoard);
+        // }
+        const board = await this.boardRepository.getBoardById(boardId);
+        if (!board) return null;
+        // await this.redisClient.setEx(cacheKey, 300, JSON.stringify(board));
+        return board;
+    }
 
-    async getBoard(boardId: string): Promise<Board | null> {
-        const existingBoard = this.boards.find((el) => el.id === boardId);
-        if (!existingBoard) {
-            throw new Error('Board not found');
+    async getBoardByUserId(userId: number): Promise<Board[] | null> {
+        const boards = await this.boardRepository.getBoardsByUserId(userId);
+        if (!boards) return null;
+        return boards;
+    }
+
+    // Обновление пользователя
+    async updateBoard(
+        boardId: number,
+        command: UpdateBoardCommand
+    ): Promise<Board | null> {
+        const board = await this.boardRepository.getBoardById(boardId);
+        if (!board) {
+            return null;
         }
-        return existingBoard
+
+        board.title = command.title;
+        await this.boardRepository.updateBoard(board);
+        // await this.redisClient.del(`board:${boardId}`);
+        // await this.redisClient.del("boards:all");
+
+        return board;
     }
 
-    async createBoard(board: Board, projectId: string): Promise<void> {
-        this.boards.push(board);
-        await this.boardRepository.saveBoard(board);
+    // Удаление пользователя
+    async deleteBoard(boardId: number): Promise<boolean> {
+        return this.boardRepository.deleteBoard(boardId);
     }
-
-    async updateBoard(board: Board): Promise<void> {
-        const existingBoard = this.boards.find((el) => el.id === board.id);
-        if (!existingBoard) {
-            throw new Error('Board not found');
-        }
-        this.boards = this.boards.map((el) => (el.id === board.id ? board : el));
-        await this.boardRepository.saveBoard(board);
-    }
-
-    async deleteBoard(boardId: string): Promise<void> {
-        const existingBoard = this.boards.find((el) => el.id === boardId);
-        if (!existingBoard) {
-            throw new Error('Board not found');
-        }
-        this.boards = this.boards.filter((el) => el.id !== boardId);
-        await this.boardRepository.deleteBoard(boardId);
-    }
-}
-
-export interface BoardDTO {
-    id: string;
-    title: string;
-    projectId: string;
 }

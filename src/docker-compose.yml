@@ -2,7 +2,12 @@ name: monolith
 services:
     frontend:
         container_name: monolith_frontend
+        environment:
+            WATCHPACK_POLLING: true
         build: frontend/
+        volumes:
+            - ./frontend:/app_frontend
+            - /app_frontend/node_modules
         ports:
             - "3000:5173"
         depends_on:
