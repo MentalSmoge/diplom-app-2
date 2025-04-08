@@ -33,7 +33,7 @@ export class BoardService {
             return 3;
         }
         return 0
-    }
+    } //TODO Выкинуть со страницы если разлогинишься
 
 
     async getBoardsByUserId(userId: number): Promise<Board[] | null> {

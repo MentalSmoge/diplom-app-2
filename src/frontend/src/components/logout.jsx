@@ -1,9 +1,8 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '../userContext';
+import { userStore } from '../stores/userStore';
 
 export function Logout() {
-    const { logout } = useUser();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -13,7 +12,7 @@ export function Logout() {
                     method: 'POST',
                     credentials: 'include',
                 });
-                logout();
+                userStore.clearUser()
                 navigate('/login');
             } catch (error) {
                 console.error('Logout failed:', error);

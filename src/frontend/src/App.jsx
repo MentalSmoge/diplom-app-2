@@ -4,30 +4,27 @@ import Users from "./pages/users";
 import { Login } from "./pages/login";
 import { Register } from "./pages/register";
 import ProtectedRoute from "./components/protectedRoute";
-import { UserProvider } from "./components/userContext";
 import { Header } from "./components/header";
 import Boards from "./pages/boards";
 
 function App() {
   return (
-    <UserProvider>
-      <Router>
-        <div className="App">
-          <Header />
+    <Router>
+      <div className="App">
+        <Header />
 
-          <Routes>
-            <Route path="/" element={<Navigate to="/board" />} />
-            <Route path="/user" element={<Users />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route element={<ProtectedRoute />}>
-              <Route path="/boards" element={<Boards />} />
-              <Route path="/boards/:boardId" element={<Board />} />
-            </Route>
-          </Routes>
-        </div>
-      </Router>
-    </UserProvider>
+        <Routes>
+          <Route path="/" element={<Navigate to="/board" />} />
+          <Route path="/user" element={<Users />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/boards" element={<Boards />} />
+            <Route path="/boards/:boardId" element={<Board />} />
+          </Route>
+        </Routes>
+      </div>
+    </Router>
   )
 }
 

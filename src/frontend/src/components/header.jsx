@@ -11,6 +11,7 @@ export const Header = observer(() => {
             credentials: 'include',
         });
         userStore.clearUser();
+        navigate('/login');
     };
 
     return (

@@ -67,6 +67,10 @@ export function Board() {
 		const getAccessLevel = async () => {
 			const isAuthenticated = await checkBoardAccess(parseInt(boardId));
 			console.log(isAuthenticated)
+			if (isAuthenticated === null) {
+				navigate('/login');
+				return;
+			}
 			if (isAuthenticated.data === 0) {
 				navigate('/login');
 				return;
