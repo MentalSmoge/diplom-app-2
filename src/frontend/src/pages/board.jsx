@@ -1,13 +1,24 @@
-import React, { useEffect, useState } from "react";
-import { Stage, Layer, Text, Rect } from "react-konva";
+import React, { useEffect, useState, useRef } from "react";
+import { Stage, Layer, Text, Rect, Transformer } from "react-konva";
 import { socket } from "../socket";
 import { useParams, useNavigate } from "react-router-dom";
 import { checkBoardAccess } from "../api/auth";
+import EditableText from "../components/board_components/text";
 
 
 export function Board() {
 	const { boardId } = useParams(); // Получаем ID доски из URL
 	const [elements, setElements] = useState([]);
+	const [selectedIds, setSelectedIds] = useState([]);
+	const [selectionRectangle, setSelectionRectangle] = useState({
+		visible: false,
+		x1: 0,
+		y1: 0,
+		x2: 0,
+		y2: 0,
+	});
+	const transformerRef = useRef();
+	const rectRefs = useRef(new Map());
 	const [isConnected, setIsConnected] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const navigate = useNavigate();
@@ -62,11 +73,23 @@ export function Board() {
 		};
 	}
 
+	const effectRan = useRef(false)
 	useEffect(() => {
+		if (selectedIds.length && transformerRef.current) {
+			// Get the nodes from the refs Map
+			const nodes = selectedIds
+				.map(id => rectRefs.current.get(id))
+				.filter(node => node);
+
+			transformerRef.current.nodes(nodes);
+		} else if (transformerRef.current) {
+			// Clear selection
+			transformerRef.current.nodes([]);
+		}
+		if (effectRan.current === true) { return }
 		// Проверяем аутентификацию при загрузке компонента
 		const getAccessLevel = async () => {
 			const isAuthenticated = await checkBoardAccess(parseInt(boardId));
-			console.log(isAuthenticated)
 			if (isAuthenticated === null) {
 				navigate('/login');
 				return;
@@ -77,11 +100,13 @@ export function Board() {
 			}
 			connectToBoard(isAuthenticated.data)
 		};
-
 		getAccessLevel();
+		return () => {
+			effectRan.current = true;
+		};
 
 
-	}, [boardId, navigate]);
+	}, [boardId, navigate, selectedIds]);
 
 	const handleCreateElement = (element) => {
 		console.log(isConnected)
@@ -171,7 +196,44 @@ export function Board() {
 			handleUpdateElement(movedElement);
 		}
 	};
+	const handleStageClick = (e) => {
+		// If we are selecting with rect, do nothing
+		console.log(selectedIds)
+		if (selectionRectangle.visible) {
+			return;
+		}
 
+		// If click on empty area - remove all selections
+		if (e.target === e.target.getStage()) {
+			setSelectedIds([]);
+			return;
+		}
+		console.log(e.target.getName())
+
+		// Do nothing if clicked NOT on our rectangles
+		if (!e.target.hasName('selectable')) {
+			return;
+		}
+
+		const clickedId = e.target.id();
+
+		// Do we pressed shift or ctrl?
+		const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey;
+		const isSelected = selectedIds.includes(clickedId);
+
+		if (!metaPressed && !isSelected) {
+			// If no key pressed and the node is not selected
+			// select just one
+			setSelectedIds([clickedId]);
+		} else if (metaPressed && isSelected) {
+			// If we pressed keys and node was selected
+			// we need to remove it from selection
+			setSelectedIds(selectedIds.filter(id => id !== clickedId));
+		} else if (metaPressed && !isSelected) {
+			// Add the node into selection
+			setSelectedIds([...selectedIds, clickedId]);
+		}
+	};
 	return (
 		<div>
 			<div>Current Board: {boardId}</div>
@@ -191,7 +253,8 @@ export function Board() {
 			<button onClick={() => printDebugElements()}>
 				Debug all Elements
 			</button>
-			<Stage width={window.innerWidth} height={window.innerHeight} draggable={true}>
+			<Stage width={window.innerWidth} height={window.innerHeight} draggable={true}
+				onClick={handleStageClick}>
 				<Layer>
 					{elements.map((element) =>
 						element.type === "text" ? (
@@ -215,10 +278,28 @@ export function Board() {
 								scaleY={element.isDragging ? 1.2 : 1}
 								onDragStart={handleDragStart}
 								onDragEnd={handleDragEnd}
+								name="selectable"
+								ref={node => {
+									if (node) {
+										rectRefs.current.set(element.id, node);
+									}
+								}}
 							/>
 						) : null
 					)}
+					<Transformer
+						ref={transformerRef}
+						boundBoxFunc={(oldBox, newBox) => {
+							// Limit resize
+							if (newBox.width < 5 || newBox.height < 5) {
+								return oldBox;
+							}
+							return newBox;
+						}}
+					/>
+					<EditableText />
 				</Layer>
+
 			</Stage>
 		</div>
 	);
