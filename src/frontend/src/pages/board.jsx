@@ -157,7 +157,7 @@ export function Board() {
 
 
 	const deleteRectangle = (elementId) => {
-		handleDeleteElement(elementId);
+		if (elementId) handleDeleteElement(elementId);
 	};
 
 	const paintRectangle = (element) => {
