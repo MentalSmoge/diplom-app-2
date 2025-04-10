@@ -61,17 +61,24 @@ const TextEditor = ({ value, textNodeRef, onClose, onBlur, onChange }) => {
     );
 };
 
-const EditableText = () => {
-    const [text, setText] = useState('Some text here');
+const EditableText = ({
+    element,
+    onDragStart,
+    onDragEnd,
+    rectRefs,
+    transformerRef
+}) => {
+    const [text, setText] = useState('Text So Loooong');
     const [isEditing, setIsEditing] = useState(false);
     const [textWidth, setTextWidth] = useState(200);
     const textRef = useRef();
-    const trRef = useRef();
+    const groupRef = useRef();
+    const trRef = transformerRef;
 
     useEffect(() => {
-        if (trRef.current && textRef.current) {
-            trRef.current.nodes([textRef.current]);
-        }
+        // if (trRef.current && textRef.current) {
+        //     trRef.current.nodes([textRef.current]);
+        // }
     }, [isEditing]);
 
     const handleTextDblClick = useCallback(() => {
@@ -82,29 +89,52 @@ const EditableText = () => {
         setText(newText);
     }, []);
 
+
+
     const handleTransform = useCallback((e) => {
+        const group = groupRef.current;
         const node = textRef.current;
-        const scaleX = node.scaleX();
+        const scaleX = group.scaleX();
+        console.log(group.scaleX())
         const newWidth = node.width() * scaleX;
         setTextWidth(newWidth);
         node.setAttrs({
             width: newWidth,
             scaleX: 1,
         });
+        console.log(group.scaleX())
     }, []);
 
     return (
         // <Stage width={window.innerWidth} height={window.innerHeight}>
-        <Group draggable>
+        <Group draggable
+            id={element.id}
+            name='selectable'
+            x={element.x}
+            y={element.y}
+            rotation={element.rotation}
+            height={element.height}
+            width={element.width}
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+            ref={groupNode => {
+                if (groupNode) {
+                    rectRefs.current.set(element.id, groupNode);
+                    groupRef.current = groupNode
+                }
+            }}
+            onTransform={handleTransform}
+        >
             <Text
+                name='text'
                 ref={textRef}
                 text={text}
                 fontSize={20}
                 width={textWidth}
                 onDblClick={handleTextDblClick}
                 onDblTap={handleTextDblClick}
-                onTransform={handleTransform}
                 visible={!isEditing}
+            // onTransform={() => { console.log("SAS") }}
             />
             {isEditing && (
                 <Group>
@@ -117,7 +147,7 @@ const EditableText = () => {
                     />
                 </Group>
             )}
-            {!isEditing && (
+            {/* {!isEditing && (
                 <Transformer
                     ref={trRef}
                     rotateEnabled={false}
@@ -127,7 +157,7 @@ const EditableText = () => {
                         width: Math.max(30, newBox.width),
                     })}
                 />
-            )}
+            )} */}
         </Group>
         // </Stage>
     );

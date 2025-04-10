@@ -139,6 +139,22 @@ export function Board() {
 		};
 		handleCreateElement(newElement);
 	};
+	const addText = () => {
+		const newElement = {
+			id: Date.now().toString(),
+			boardId: boardId,
+			type: "text",
+			x: 100,
+			y: 100,
+			width: 100,
+			height: 100,
+			isDragging: false,
+			onDragStart: handleDragStart,
+			onDragEnd: handleDragEnd,
+		};
+		handleCreateElement(newElement);
+	};
+
 
 	const deleteRectangle = (elementId) => {
 		handleDeleteElement(elementId);
@@ -164,6 +180,7 @@ export function Board() {
 	};
 
 	const handleDragStart = (e) => {
+		console.log(e.target)
 		const id = e.target.id();
 		setElements(
 			elements.map((element) => {
@@ -199,7 +216,6 @@ export function Board() {
 	};
 	const handleStageClick = (e) => {
 		// If we are selecting with rect, do nothing
-		console.log(selectedIds)
 		if (selectionRectangle.visible) {
 			return;
 		}
@@ -209,7 +225,11 @@ export function Board() {
 			setSelectedIds([]);
 			return;
 		}
-		console.log(e.target.getName())
+
+		if (e.target.hasName('text')) { //TODO Hack for text node
+			e.target = e.target.getAncestors()[0]
+		}
+		console.log(selectedIds)
 
 		// Do nothing if clicked NOT on our rectangles
 		if (!e.target.hasName('selectable')) {
@@ -243,6 +263,7 @@ export function Board() {
 
 		// Update each transformed node
 		nodes.forEach(node => {
+			console.log("NODE", node)
 			const id = node.id();
 			const index = newRects.findIndex(r => r.id === id);
 
@@ -262,6 +283,8 @@ export function Board() {
 					width: Math.max(5, node.width() * scaleX),
 					height: Math.max(node.height() * scaleY),
 					rotation: node.rotation(),
+					skewX: node.skewX(),
+					skewY: node.skewY(),
 				};
 				handleUpdateElement(newRects[index])
 			}
@@ -270,6 +293,7 @@ export function Board() {
 	return (
 		<div>
 			<div>Current Board: {boardId}</div>
+			<button onClick={addText}>Add Text</button>
 			<button onClick={addRectangle}>Add Rectangle</button>
 			<button onClick={() => deleteRectangle(elements[0]?.id)}>
 				Delete Rectangle
@@ -291,9 +315,9 @@ export function Board() {
 				<Layer>
 					{elements.map((element) =>
 						element.type === "text" ? (
-							<Text key={element.id} {...element} />
+							<EditableText key={element.id} element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} transformerRef={transformerRef} />
 						) : element.type === "rect" ? (
-							<RectangleElement element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} />
+							<RectangleElement key={element.id} element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} />
 						) : null
 					)}
 					<Transformer
@@ -307,7 +331,7 @@ export function Board() {
 						}}
 						onTransformEnd={handleTransformEnd}
 					/>
-					<EditableText />
+					{/* <EditableText /> */}
 				</Layer>
 
 			</Stage>
