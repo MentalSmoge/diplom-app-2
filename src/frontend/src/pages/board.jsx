@@ -4,6 +4,7 @@ import { socket } from "../socket";
 import { useParams, useNavigate } from "react-router-dom";
 import { checkBoardAccess } from "../api/auth";
 import EditableText from "../components/board_components/text";
+import { RectangleElement } from "../components/board_components/rect";
 
 
 export function Board() {
@@ -234,6 +235,38 @@ export function Board() {
 			setSelectedIds([...selectedIds, clickedId]);
 		}
 	};
+	const handleTransformEnd = (e) => {
+		// Find which rectangle(s) were transformed
+		const nodes = transformerRef.current.nodes();
+
+		const newRects = [...elements];
+
+		// Update each transformed node
+		nodes.forEach(node => {
+			const id = node.id();
+			const index = newRects.findIndex(r => r.id === id);
+
+			if (index !== -1) {
+				const scaleX = node.scaleX();
+				const scaleY = node.scaleY();
+
+				// Reset scale
+				node.scaleX(1);
+				node.scaleY(1);
+
+				// Update the state with new values
+				newRects[index] = {
+					...newRects[index],
+					x: node.x(),
+					y: node.y(),
+					width: Math.max(5, node.width() * scaleX),
+					height: Math.max(node.height() * scaleY),
+					rotation: node.rotation(),
+				};
+				handleUpdateElement(newRects[index])
+			}
+		});
+	};
 	return (
 		<div>
 			<div>Current Board: {boardId}</div>
@@ -260,31 +293,7 @@ export function Board() {
 						element.type === "text" ? (
 							<Text key={element.id} {...element} />
 						) : element.type === "rect" ? (
-							<Rect
-								key={element.id}
-								id={element.id}
-								x={element.x}
-								y={element.y}
-								fill={element.fill}
-								height={element.height}
-								width={element.width}
-								draggable
-								shadowColor="black"
-								shadowBlur={10}
-								shadowOpacity={0.6}
-								shadowOffsetX={element.isDragging ? 10 : 5}
-								shadowOffsetY={element.isDragging ? 10 : 5}
-								scaleX={element.isDragging ? 1.2 : 1}
-								scaleY={element.isDragging ? 1.2 : 1}
-								onDragStart={handleDragStart}
-								onDragEnd={handleDragEnd}
-								name="selectable"
-								ref={node => {
-									if (node) {
-										rectRefs.current.set(element.id, node);
-									}
-								}}
-							/>
+							<RectangleElement element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} />
 						) : null
 					)}
 					<Transformer
@@ -296,6 +305,7 @@ export function Board() {
 							}
 							return newBox;
 						}}
+						onTransformEnd={handleTransformEnd}
 					/>
 					<EditableText />
 				</Layer>

@@ -5,13 +5,15 @@ import { Rect } from 'react-konva';
 export const RectangleElement = ({
     element,
     onDragStart,
-    onDragEnd
+    onDragEnd,
+    rectRefs
 }) => {
     return (
         <Rect
             id={element.id}
             x={element.x}
             y={element.y}
+            rotation={element.rotation}
             fill={element.fill}
             height={element.height}
             width={element.width}
@@ -25,6 +27,12 @@ export const RectangleElement = ({
             scaleY={element.isDragging ? 1.2 : 1}
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
+            name="selectable"
+            ref={node => {
+                if (node) {
+                    rectRefs.current.set(element.id, node);
+                }
+            }}
         />
     );
 };
