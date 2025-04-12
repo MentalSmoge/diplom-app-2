@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback, useLayoutEffect } from 'react
 
 Konva._fixTextRendering = true;
 
-const TextEditor = ({ value, textNodeRef, onClose, onBlur, onChange }) => {
+const TextEditor = ({ value, textNodeRef, onClose, onBlur, onChange, element }) => {
     const [style, setStyle] = useState();
     useLayoutEffect(() => {
         const textNode = textNodeRef;
@@ -36,6 +36,9 @@ const TextEditor = ({ value, textNodeRef, onClose, onBlur, onChange }) => {
             transform += `rotateZ(${rotation}deg)`;
         }
         newStyle.transform = transform;
+        newStyle.position = 'absolute';
+        newStyle.left = element.x + 'px';
+        newStyle.top = element.y + 'px';
         // newStyle.height = 'auto';
 
         if (JSON.stringify(newStyle) !== JSON.stringify(style)) {
@@ -73,15 +76,13 @@ const EditableText = ({
     const [isEditing, setIsEditing] = useState(false);
     const [textWidth, setTextWidth] = useState(200);
     const textRef = useRef();
-    const groupRef = useRef();
-    const trRef = transformerRef;
-
     useEffect(() => {
         setText(element.text);
+        setTextWidth(element.width);
         // if (trRef.current && textRef.current) {
         //     trRef.current.nodes([textRef.current]);
         // }
-    }, [isEditing, element.text]);
+    }, [isEditing, element.text, element.width]);
 
     const handleTextDblClick = useCallback(() => {
         setIsEditing(true);
@@ -93,80 +94,94 @@ const EditableText = ({
             ...element,
             text: newText
         };
-        console.log("Wow text changed", updatedElement)
+        // console.log("Wow text changed", updatedElement)
         onUpdateElement(updatedElement);
     }, [element, onUpdateElement]);
 
 
 
     const handleTransform = useCallback((e) => {
-        const group = groupRef.current;
         const node = textRef.current;
-        const scaleX = group.scaleX();
-        console.log(group.scaleX())
+        const scaleX = node.scaleX();
         const newWidth = node.width() * scaleX;
         setTextWidth(newWidth);
         node.setAttrs({
             width: newWidth,
             scaleX: 1,
         });
-        console.log(group.scaleX())
+        // console.log(node.width(), scaleX, newWidth)
     }, []);
 
     return (
         // <Stage width={window.innerWidth} height={window.innerHeight}>
-        <Group draggable
-            id={element.id}
-            name='selectable'
-            x={element.x}
-            y={element.y}
-            rotation={element.rotation}
-            height={element.height}
-            width={element.width}
-            onDragStart={onDragStart}
-            onDragEnd={onDragEnd}
-            ref={groupNode => {
-                if (groupNode) {
-                    rectRefs.current.set(element.id, groupNode);
-                    groupRef.current = groupNode
-                }
-            }}
-            onTransform={handleTransform}
-        >
+        <>
             <Text
-                name='text'
-                ref={textRef}
+                draggable
+                onDragStart={onDragStart}
+                onDragEnd={onDragEnd}
+                id={element.id}
+                name='selectable'
+                // ref={textRef}
+                x={element.x}
+                y={element.y}
                 text={text}
                 fontSize={20}
                 width={textWidth}
                 onDblClick={handleTextDblClick}
                 onDblTap={handleTextDblClick}
                 visible={!isEditing}
+                onTransform={handleTransform}
+                ref={node => {
+                    if (node) {
+                        rectRefs.current.set(element.id, node);
+                        textRef.current = node
+                    }
+                }}
             // onTransform={() => { console.log("SAS") }}
             />
             {isEditing && (
-                <Group>
-                    <TextEditor
-                        value={text}
-                        textNodeRef={textRef.current}
-                        onChange={handleTextChange}
-                        onClose={() => setIsEditing(false)}
-                        onBlur={() => setIsEditing(false)}
-                    />
-                </Group>
-            )}
-            {/* {!isEditing && (
-                <Transformer
-                    ref={trRef}
-                    rotateEnabled={false}
-                    enabledAnchors={['middle-left', 'middle-right']}
-                    boundBoxFunc={(oldBox, newBox) => ({
-                        ...newBox,
-                        width: Math.max(30, newBox.width),
-                    })}
+                <TextEditor
+                    value={text}
+                    element={element}
+                    textNodeRef={textRef.current}
+                    onChange={handleTextChange}
+                    onClose={() => setIsEditing(false)}
+                    onBlur={() => setIsEditing(false)}
                 />
-            )} */}
-        </Group>
+            )}
+        </>
+        // <Group
+        //     draggable
+        //     id={element.id}
+        //     name='selectable'
+        //     x={element.x}
+        //     y={element.y}
+        //     rotation={element.rotation}
+        //     height={element.height}
+        //     width={element.width}
+        //     onDragStart={onDragStart}
+        //     onDragEnd={onDragEnd}
+        //     ref={groupNode => {
+        //         if (groupNode) {
+        //             rectRefs.current.set(element.id, groupNode);
+        //             groupRef.current = groupNode
+        //         }
+        //     }}
+        //     onTransform={handleTransform}
+        // >
+
+        //     {/* {!isEditing && (
+        //         <Transformer
+        //             ref={trRef}
+        //             rotateEnabled={false}
+        //             enabledAnchors={['middle-left', 'middle-right']}
+        //             boundBoxFunc={(oldBox, newBox) => ({
+        //                 ...newBox,
+        //                 width: Math.max(30, newBox.width),
+        //             })}
+        //         />
+        //     )} */}
+        // </Group >
         // </Stage>
     );
 };
