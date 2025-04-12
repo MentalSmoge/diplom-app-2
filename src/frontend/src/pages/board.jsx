@@ -325,8 +325,14 @@ export function Board() {
 						ref={transformerRef}
 						boundBoxFunc={(oldBox, newBox) => {
 							// Limit resize
-							if (newBox.width < 5 || newBox.height < 5) {
+							if (newBox.width < 20 && newBox.height < 20) {
 								return oldBox;
+							}
+							if (newBox.width < 20) {
+								return { ...newBox, width: 20 };
+							}
+							if (newBox.height < 20) {
+								return { ...newBox, height: 20 };
 							}
 							return newBox;
 						}}
