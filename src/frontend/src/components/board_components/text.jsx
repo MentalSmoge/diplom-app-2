@@ -36,7 +36,7 @@ const TextEditor = ({ value, textNodeRef, onClose, onBlur, onChange }) => {
             transform += `rotateZ(${rotation}deg)`;
         }
         newStyle.transform = transform;
-        newStyle.height = 'auto';
+        // newStyle.height = 'auto';
 
         if (JSON.stringify(newStyle) !== JSON.stringify(style)) {
             setStyle(newStyle);
@@ -66,9 +66,10 @@ const EditableText = ({
     onDragStart,
     onDragEnd,
     rectRefs,
-    transformerRef
+    transformerRef,
+    onUpdateElement // Добавляем новый пропс
 }) => {
-    const [text, setText] = useState('Text So Loooong');
+    const [text, setText] = useState(element.text);
     const [isEditing, setIsEditing] = useState(false);
     const [textWidth, setTextWidth] = useState(200);
     const textRef = useRef();
@@ -76,10 +77,11 @@ const EditableText = ({
     const trRef = transformerRef;
 
     useEffect(() => {
+        setText(element.text);
         // if (trRef.current && textRef.current) {
         //     trRef.current.nodes([textRef.current]);
         // }
-    }, [isEditing]);
+    }, [isEditing, element.text]);
 
     const handleTextDblClick = useCallback(() => {
         setIsEditing(true);
@@ -87,7 +89,13 @@ const EditableText = ({
 
     const handleTextChange = useCallback((newText) => {
         setText(newText);
-    }, []);
+        const updatedElement = {
+            ...element,
+            text: newText
+        };
+        console.log("Wow text changed", updatedElement)
+        onUpdateElement(updatedElement);
+    }, [element, onUpdateElement]);
 
 
 

@@ -144,6 +144,7 @@ export function Board() {
 			id: Date.now().toString(),
 			boardId: boardId,
 			type: "text",
+			text: "Enter text...",
 			x: 100,
 			y: 100,
 			width: 100,
@@ -315,7 +316,7 @@ export function Board() {
 				<Layer>
 					{elements.map((element) =>
 						element.type === "text" ? (
-							<EditableText key={element.id} element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} transformerRef={transformerRef} />
+							<EditableText key={element.id} element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} transformerRef={transformerRef} onUpdateElement={handleUpdateElement} />
 						) : element.type === "rect" ? (
 							<RectangleElement key={element.id} element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} />
 						) : null
