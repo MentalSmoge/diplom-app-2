@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { checkBoardAccess } from "../api/auth";
 import EditableText from "../components/board_components/text";
 import { RectangleElement } from "../components/board_components/rect";
+import EdgeArrow from "../components/board_components/arrow";
 
 
 export function Board() {
@@ -155,6 +156,21 @@ export function Board() {
 		};
 		handleCreateElement(newElement);
 	};
+	const addArrow = () => {
+		const newElement = {
+			id: Date.now().toString(),
+			boardId: boardId,
+			type: "arrow",
+			x_start: 100,
+			y_start: 100,
+			x_end: 200,
+			y_end: 200,
+			isDragging: false,
+			onDragStart: handleDragStart,
+			onDragEnd: handleDragEnd,
+		};
+		handleCreateElement(newElement);
+	};
 
 
 	const deleteRectangle = (elementId) => {
@@ -191,6 +207,39 @@ export function Board() {
 				};
 			})
 		);
+	};
+	const handleDragEndArrow = (e, group, node) => {
+		console.log(group, node)
+		const id = group.id();
+		const updatedElements = elements.map((element) => {
+			if (element.id === id) {
+				if (node === "start") {
+					return {
+						...element,
+						x_start: e.target.x(),
+						y_start: e.target.y(),
+						isDragging: false,
+					};
+				}
+				else {
+					return {
+						...element,
+						x_end: e.target.x(),
+						y_end: e.target.y(),
+						isDragging: false,
+					};
+				}
+			}
+			return element;
+		});
+		setElements(updatedElements);
+
+		const movedElement = updatedElements.find(
+			(element) => element.id === id
+		);
+		if (movedElement) {
+			handleUpdateElement(movedElement);
+		}
 	};
 
 	const handleDragEnd = (e) => {
@@ -234,6 +283,7 @@ export function Board() {
 
 		// Do nothing if clicked NOT on our rectangles
 		if (!e.target.hasName('selectable')) {
+			setSelectedIds([]);
 			return;
 		}
 
@@ -294,6 +344,7 @@ export function Board() {
 	return (
 		<div>
 			<div>Current Board: {boardId}</div>
+			<button onClick={addArrow}>Add Arrow</button>
 			<button onClick={addText}>Add Text</button>
 			<button onClick={addRectangle}>Add Rectangle</button>
 			<button onClick={() => deleteRectangle(elements[0]?.id)}>
@@ -319,6 +370,8 @@ export function Board() {
 							<EditableText key={element.id} element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} transformerRef={transformerRef} onUpdateElement={handleUpdateElement} />
 						) : element.type === "rect" ? (
 							<RectangleElement key={element.id} element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} />
+						) : element.type === "arrow" ? (
+							<EdgeArrow key={element.id} element={element} onDragEnd={handleDragEndArrow} onDragStart={handleDragStart} rectRefs={rectRefs} />
 						) : null
 					)}
 					<Transformer

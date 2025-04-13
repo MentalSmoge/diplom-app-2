@@ -69,8 +69,7 @@ const EditableText = ({
     onDragStart,
     onDragEnd,
     rectRefs,
-    transformerRef,
-    onUpdateElement // Добавляем новый пропс
+    onUpdateElement
 }) => {
     const [text, setText] = useState(element.text);
     const [isEditing, setIsEditing] = useState(false);
