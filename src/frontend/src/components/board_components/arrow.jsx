@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Stage, Layer, Circle, Arrow, Text, Group } from "react-konva";
 const degrees_to_radians = degrees => degrees * (Math.PI / 180);
+import { observer } from "mobx-react-lite";
 const Edge = ({ nodeStart, nodeEnd }) => {
     const dx = nodeEnd.x - nodeStart.x;
     const dy = nodeEnd.y - nodeStart.y;
@@ -54,8 +55,8 @@ const Edge = ({ nodeStart, nodeEnd }) => {
         </Group>
     );
 };
-const EdgeArrow =
-    ({
+const EdgeArrow = observer
+    (({
         element,
         onDragStart,
         onDragEnd,
@@ -63,6 +64,22 @@ const EdgeArrow =
         onUpdateElement
     }) => {
         const groupRef = React.useRef();
+        React.useEffect(() => {
+            updateNodeStart({
+                x: element.x_start,
+                y: element.y_start,
+                width: 25,
+                height: 25,
+                draggable: true
+            });
+            updateNodeEnd({
+                x: element.x_end,
+                y: element.y_end,
+                width: 25,
+                height: 25,
+                draggable: true
+            });
+        }, [element.x_start, element.y_start, element.x_end, element.y_end]);
 
         const NODE_START = {
             x: element.x_start,
@@ -106,6 +123,8 @@ const EdgeArrow =
                 />
                 <Circle
                     {...nodeEnd}
+                    x={element.x_end}
+                    y={element.y_end}
                     onDragMove={e => {
                         updateNodeEnd({ ...nodeEnd, ...e.target.position() });
                     }}
@@ -114,5 +133,5 @@ const EdgeArrow =
                 />
             </Group>
         );
-    }
+    })
 export default EdgeArrow;

@@ -6,9 +6,10 @@ import { checkBoardAccess } from "../api/auth";
 import EditableText from "../components/board_components/text";
 import { RectangleElement } from "../components/board_components/rect";
 import EdgeArrow from "../components/board_components/arrow";
+import { observer } from "mobx-react";
 
 
-export function Board() {
+const Board = observer(() => {
 	const { boardId } = useParams(); // Получаем ID доски из URL
 	const [elements, setElements] = useState([]);
 	const [selectedIds, setSelectedIds] = useState([]);
@@ -37,24 +38,22 @@ export function Board() {
 		if (!isConnected) {
 			socket.connect();
 		}
+		
 		const handleBoardState = (serverElements) => {
 			setElements(serverElements);
 		};
 
 		const handleElementCreated = (element) => {
-			console.log("element-created:", element);
 			setElements((prev) => [...prev, element]);
 		};
 
 		const handleElementUpdated = (element) => {
-			console.log("element-updated:", element);
 			setElements((prev) =>
 				prev.map((el) => (el.id === element.id ? element : el))
 			);
 		};
 
 		const handleElementDeleted = (elementId) => {
-			console.log("element-deleted:", elementId);
 			setElements((prev) => prev.filter((el) => el.id !== elementId));
 		};
 
@@ -209,7 +208,7 @@ export function Board() {
 		);
 	};
 	const handleDragEndArrow = (e, group, node) => {
-		console.log(group, node)
+		console.log(e.target, group, node)
 		const id = group.id();
 		const updatedElements = elements.map((element) => {
 			if (element.id === id) {
@@ -397,4 +396,5 @@ export function Board() {
 			</Stage>
 		</div>
 	);
-}
+})
+export default Board

@@ -12,8 +12,6 @@ export class WebSocketController {
 	}
 
 	private setupHandlers(): void {
-		console.log("I LIVVVEEEE")
-		console.log(this.io)
 		this.io.on("connection", (socket: Socket) => {
 			console.log("User connected:", socket.id);
 			socket.on("join-board", async (boardId: string) => {

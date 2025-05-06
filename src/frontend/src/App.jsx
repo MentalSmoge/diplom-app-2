@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { Board } from "./pages/board";
+import Board from "./pages/board";
 import Users from "./pages/users";
 import { Login } from "./pages/login";
 import { Register } from "./pages/register";

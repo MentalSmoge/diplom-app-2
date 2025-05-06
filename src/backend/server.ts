@@ -20,6 +20,7 @@ import { AuthService } from "./application/auth_service";
 import cookieParser from 'cookie-parser';
 import { PostgreSQLBoardRepository } from "./infrastructure/boards_repository";
 import { createBoardRouter } from "./framework/board_routes";
+import { PostgreSQLElementRepository } from "./infrastructure/elements_repository_postgre";
 
 const port = process.env.USERS_PORT || 8080;
 const app = express();
@@ -46,14 +47,15 @@ async function startUsersServer() {
             : 28015,
     });
     // Репозитории
-    const elementRepository = new RethinkDBElementRepository(rethinkConnection);
+    const elementRepository_old = new RethinkDBElementRepository(rethinkConnection); //СТАРЫЙ
+    const elementRepository_new = new PostgreSQLElementRepository(pool); //НОВЫЙ
     const userRepository = new PostgreSQLUserRepository(pool);
     const boardRepository = new PostgreSQLBoardRepository(pool);
     // Сервисы
     const userService = new UserService(userRepository, redisClient);
     const boardService = new BoardService(boardRepository);
     const authService = new AuthService(userRepository);
-    const elementService = new ElementService(elementRepository);
+    const elementService = new ElementService(elementRepository_new);
     await elementService.initialize();
 
     new WebSocketController(io, elementService, boardService);
