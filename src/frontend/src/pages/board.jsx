@@ -38,7 +38,7 @@ const Board = observer(() => {
 		if (!isConnected) {
 			socket.connect();
 		}
-		
+
 		const handleBoardState = (serverElements) => {
 			setElements(serverElements);
 		};
@@ -81,7 +81,7 @@ const Board = observer(() => {
 			const nodes = selectedIds
 				.map(id => rectRefs.current.get(id))
 				.filter(node => node);
-
+			// console.log(elements)
 			transformerRef.current.nodes(nodes);
 		} else if (transformerRef.current) {
 			// Clear selection
@@ -174,21 +174,6 @@ const Board = observer(() => {
 
 	const deleteRectangle = (elementId) => {
 		if (elementId) handleDeleteElement(elementId);
-	};
-
-	const paintRectangle = (element) => {
-		const updatedElement = {
-			id: element.id,
-			boardId: boardId,
-			type: "rect",
-			x: element.x,
-			y: element.y,
-			width: 150,
-			height: 150,
-			fill: "blue",
-			isDragging: false,
-		};
-		handleUpdateElement(updatedElement);
 	};
 
 	const printDebugElements = () => {
@@ -340,6 +325,152 @@ const Board = observer(() => {
 			}
 		});
 	};
+	const stageRef = useRef(null);
+	function getGroupBoundingBox(group) {
+		if (group.length === 0) return null;
+
+		// Находим минимальные и максимальные X и Y
+		let minX = Infinity;
+		let minY = Infinity;
+		let maxX = -Infinity;
+		let maxY = -Infinity;
+
+		group.forEach(obj => {
+			let x, y, width, height;
+
+			// Определяем bounding box в зависимости от типа объекта
+			if (obj.type === "rect") {
+				x = obj.x;
+				y = obj.y;
+				width = obj.width;
+				height = obj.height;
+			} else if (obj.type === "arrow") {
+				x = Math.min(obj.x_start, obj.x_end);
+				y = Math.min(obj.y_start, obj.y_end);
+				width = Math.abs(obj.x_end - obj.x_start);
+				height = Math.abs(obj.y_end - obj.y_start);
+			} else if (obj.type === "text") {
+				x = obj.x;
+				y = obj.y;
+				width = obj.width;
+				height = obj.height;
+			}
+			// Добавьте другие типы объектов при необходимости
+
+			// Обновляем min/max значения
+			minX = Math.min(minX, x);
+			minY = Math.min(minY, y);
+			maxX = Math.max(maxX, x + width);
+			maxY = Math.max(maxY, y + height);
+		});
+
+		// Возвращаем общий bounding box
+		return {
+			x: minX,
+			y: minY,
+			width: maxX - minX,
+			height: maxY - minY,
+		};
+	}
+	const handleExport = () => {
+		console.log(stageRef)
+		const groups = findGroups(elements, 50); // threshold = 5
+
+		console.log(groups[0]);
+		console.log(groups[0].map(({ id }) => ({ id })));
+		// export_transformerRef.current.nodes(groups[0].map(obj => obj.id))
+		// console.log(export_transformerRef.current, "SASSSS")
+		// console.log(export_transformerRef.current.nodes(), "SASSSS")
+		groups.forEach(element => {
+			// console.log(element.map(({ id }) => ({ id })))
+			// export_transformerRef.current.nodes(element.map(({ id }) => ({ id })))
+			// console.log(export_transformerRef.current, "SASSSS")
+			const dimensions = getGroupBoundingBox(element)
+			console.log(dimensions)
+			const dataURL = stageRef.current.toDataURL({
+				pixelRatio: 2,
+				x: dimensions.x + (stageRef.current?.attrs?.x ?? 0), y: dimensions.y + (stageRef.current?.attrs?.y ?? 0), width: dimensions.width, height: dimensions.height
+			});
+			console.log(stageRef.current)
+			console.log({
+				pixelRatio: 2,
+				x: dimensions.x + stageRef.current.attrs.x, y: dimensions.y + stageRef.current.attrs.y, width: dimensions.width, height: dimensions.height
+			})
+
+			const link = document.createElement('a');
+			link.download = 'stage.png';
+			link.href = dataURL;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		});
+
+	};
+	function getBoundingBox(obj) {
+		if (obj.type === "arrow") {
+			return {
+				x: Math.min(obj.x_start, obj.x_end),
+				y: Math.min(obj.y_start, obj.y_end),
+				width: Math.abs(obj.x_end - obj.x_start),
+				height: Math.abs(obj.y_end - obj.y_start),
+			};
+		}
+		return {
+			x: obj.x,
+			y: obj.y,
+			width: obj.width,
+			height: obj.height,
+		};
+	}
+	function doRectanglesOverlap(rect1, rect2, threshold = 0) {
+		const box1 = getBoundingBox(rect1);
+		const box2 = getBoundingBox(rect2);
+
+		if (!box1 || !box2) return false;
+
+		return (
+			box1.x < box2.x + box2.width + threshold &&
+			box1.x + box1.width + threshold > box2.x &&
+			box1.y < box2.y + box2.height + threshold &&
+			box1.y + box1.height + threshold > box2.y
+		);
+	}
+	function findGroups(objects, threshold = 0) {
+		const groups = [];
+		const visited = new Set();
+
+		for (const obj of objects) {
+			if (visited.has(obj.id)) continue;
+
+			const queue = [obj];
+			const currentGroup = [];
+
+			while (queue.length > 0) {
+				const current = queue.shift();
+				if (visited.has(current.id)) continue;
+
+				visited.add(current.id);
+				currentGroup.push(current);
+
+				// Ищем соседей
+				for (const other of objects) {
+					if (
+						other.id !== current.id &&
+						!visited.has(other.id) &&
+						doRectanglesOverlap(current, other, threshold)
+					) {
+						queue.push(other);
+					}
+				}
+			}
+
+			if (currentGroup.length > 0) {
+				groups.push(currentGroup);
+			}
+		}
+
+		return groups;
+	}
 	return (
 		<div>
 			<div>Current Board: {boardId}</div>
@@ -349,20 +480,14 @@ const Board = observer(() => {
 			<button onClick={() => deleteRectangle(elements[0]?.id)}>
 				Delete Rectangle
 			</button>
-			<button
-				onClick={() =>
-					paintRectangle(
-						elements[Math.floor(Math.random() * elements.length)]
-					)
-				}
-			>
-				Paint Rectangle
+			<button onClick={handleExport} style={{ marginBottom: '10px' }}>
+				Save as High Quality Image
 			</button>
 			<button onClick={() => printDebugElements()}>
 				Debug all Elements
 			</button>
 			<Stage width={window.innerWidth} height={window.innerHeight} draggable={true}
-				onClick={handleStageClick}>
+				onClick={handleStageClick} ref={stageRef}>
 				<Layer>
 					{elements.map((element) =>
 						element.type === "text" ? (
