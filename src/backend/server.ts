@@ -47,7 +47,7 @@ async function startUsersServer() {
             : 28015,
     });
     // Репозитории
-    const elementRepository_old = new RethinkDBElementRepository(rethinkConnection); //СТАРЫЙ
+    // const elementRepository_old = new RethinkDBElementRepository(rethinkConnection); //СТАРЫЙ
     const elementRepository_new = new PostgreSQLElementRepository(pool); //НОВЫЙ
     const userRepository = new PostgreSQLUserRepository(pool);
     const boardRepository = new PostgreSQLBoardRepository(pool);

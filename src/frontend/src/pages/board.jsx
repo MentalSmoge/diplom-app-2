@@ -107,8 +107,6 @@ const Board = observer(() => {
 		return () => {
 			effectRan.current = true;
 		};
-
-
 	}, [boardId, navigate, selectedIds]);
 
 	const handleCreateElement = (element) => {
@@ -173,13 +171,8 @@ const Board = observer(() => {
 		handleCreateElement(newElement);
 	};
 
-
 	const deleteRectangle = (elementId) => {
 		if (elementId) handleDeleteElement(elementId);
-	};
-
-	const printDebugElements = () => {
-		socket.emit("debug-print-elements");
 	};
 
 	const handleDragStart = (e) => {
@@ -393,10 +386,7 @@ const Board = observer(() => {
 				Delete Rectangle
 			</button>
 			<button onClick={handleExport} style={{ marginBottom: '10px' }}>
-				Save as High Quality Image
-			</button>
-			<button onClick={() => printDebugElements()}>
-				Debug all Elements
+				Export to document
 			</button>
 			<Stage width={window.innerWidth} height={window.innerHeight} draggable={true}
 				onClick={handleStageClick} ref={stageRef}>
@@ -427,9 +417,7 @@ const Board = observer(() => {
 						}}
 						onTransformEnd={handleTransformEnd}
 					/>
-					{/* <EditableText /> */}
 				</Layer>
-
 			</Stage>
 		</div>
 	);

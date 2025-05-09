@@ -9,20 +9,21 @@ import Boards from "./pages/boards";
 
 function App() {
   return (
-    <Router>
-      <div className="App">
+    <Router >
+      <div className="App" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%' }}>
         <Header />
-
-        <Routes>
-          <Route path="/" element={<Navigate to="/board" />} />
-          <Route path="/user" element={<Users />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route element={<ProtectedRoute />}>
-            <Route path="/boards" element={<Boards />} />
-            <Route path="/boards/:boardId" element={<Board />} />
-          </Route>
-        </Routes>
+        <main style={{ flex: 1 }}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/board" />} />
+            <Route path="/user" element={<Users />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/boards" element={<Boards />} />
+              <Route path="/boards/:boardId" element={<Board />} />
+            </Route>
+          </Routes>
+        </main>
       </div>
     </Router>
   )

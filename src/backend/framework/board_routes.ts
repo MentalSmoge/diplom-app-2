@@ -56,7 +56,7 @@ export function createBoardRouter(boardService: BoardService) {
 		}
 	});
 
-	// Удаление пользователя
+	// Удаление доски
 	router.delete("/boards/:id", async (req, res) => {
 		try {
 			const boardId = req.params.id;

@@ -19,7 +19,7 @@ export class PostgreSQLElementRepository implements ElementRepository {
 
     async loadInitialState(): Promise<Element[]> {
         const result = await this.pool.query(`
-            SELECT id, type, board_id as boardId, data
+            SELECT id, type, board_id, data
             FROM elements
         `);
         return result.rows.map(row => ({
