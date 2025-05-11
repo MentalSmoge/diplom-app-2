@@ -22,6 +22,12 @@ export class PostgreSQLElementRepository implements ElementRepository {
             SELECT id, type, board_id, data
             FROM elements
         `);
+        console.log(result.rows.map(row => ({
+            id: row.id,
+            type: row.type,
+            boardId: row.board_id,
+            ...row.data
+        })), "INIT")
         return result.rows.map(row => ({
             id: row.id,
             type: row.type,

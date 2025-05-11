@@ -23,45 +23,57 @@ export class PostgreSQLBoardRepository implements BoardRepository {
 
         return result.rows[0];
     }
-
-    async getBoardsByUserId(userId: number): Promise<Board[] | null> {
+    async getBoardsByProjectId(projectId: number): Promise<Board[]> {
         const result = await this.pool.query(
-            `SELECT b.id, b.title, b.project_id, ba.access_level
-             FROM boards b
-             JOIN board_accesses ba ON b.id = ba.board_id
-             WHERE ba.user_id = $1`,
-            [userId]
+            "SELECT id, title, project_id FROM boards WHERE project_id = $1",
+            [projectId]
         );
 
         if (result.rows.length === 0) {
-            return null;
+            return [];
         }
 
         return result.rows;
     }
-    async getUserAccessToBoard(userId: number, boardId: number): Promise<string> {
-        const result = await this.pool.query(
-            `SELECT access_level
-            FROM board_accesses
-            WHERE user_id = $1 AND board_id = $2;
-            `,
-            [userId, boardId]
-        );
 
-        if (result.rows.length === 0) {
-            return "no";
-        }
+    // async getBoardsByUserId(userId: number): Promise<Board[] | null> {
+    //     const result = await this.pool.query(
+    //         `SELECT b.id, b.title, b.project_id, ba.access_level
+    //          FROM boards b
+    //          JOIN board_accesses ba ON b.id = ba.board_id
+    //          WHERE ba.user_id = $1`,
+    //         [userId]
+    //     );
 
-        return result.rows[0].access_level;
-    }
+    //     if (result.rows.length === 0) {
+    //         return null;
+    //     }
 
-    async getAllBoards(): Promise<Board[]> {
-        const result = await this.pool.query(
-            'SELECT id, title, project_id FROM boards'
-        );
+    //     return result.rows;
+    // }
+    // async getUserAccessToBoard(userId: number, boardId: number): Promise<string> {
+    //     const result = await this.pool.query(
+    //         `SELECT access_level
+    //         FROM board_accesses
+    //         WHERE user_id = $1 AND board_id = $2;
+    //         `,
+    //         [userId, boardId]
+    //     );
 
-        return result.rows;
-    }
+    //     if (result.rows.length === 0) {
+    //         return "no";
+    //     }
+
+    //     return result.rows[0].access_level;
+    // }
+
+    // async getAllBoards(): Promise<Board[]> {
+    //     const result = await this.pool.query(
+    //         'SELECT id, title, project_id FROM boards'
+    //     );
+
+    //     return result.rows;
+    // }
 
     async updateBoard(board: Board): Promise<void> {
         await this.pool.query(

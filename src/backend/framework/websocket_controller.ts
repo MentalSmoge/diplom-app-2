@@ -24,11 +24,11 @@ export class WebSocketController {
 			});
 
 			// Создание элемента на доске
-			socket.on("element-create", async (data: { boardId: string; element: ElementDTO }) => {
+			socket.on("element-create", async (data: { boardId: number; element: ElementDTO }) => {
 				const { boardId, element } = data;
 				await this.elementService.createElement(element);
 				// Отправка только участникам этой доски
-				this.io.to(boardId).emit("element-created", element);
+				this.io.to(boardId.toString()).emit("element-created", element);
 			});
 
 			// Обновление элемента на доске

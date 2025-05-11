@@ -8,7 +8,7 @@ export function createBoardRouter(boardService: BoardService) {
 	// Создание доски
 	router.post("/boards", async (req, res) => {
 		try {
-			const board = await boardService.createBoard(new CreateBoardCommand(req.body.title));
+			const board = await boardService.createBoard(new CreateBoardCommand(req.body.title, req.body.projectId, req.body.user.id));
 			res.status(201).json(board);
 		} catch (error) {
 			res.status(500).json({ error: `${error}` });
@@ -19,7 +19,7 @@ export function createBoardRouter(boardService: BoardService) {
 	router.get("/board/:id", async (req, res) => {
 		try {
 			const boardId = req.params.id;
-			const board = await boardService.getBoardById(parseInt(boardId)); //TODO Сделать проверку на строку
+			const board = await boardService.getBoardById(parseInt(boardId), req.body.user.id); //TODO Сделать проверку на строку
 			if (board) {
 				res.status(200).json(board);
 			} else {
@@ -29,13 +29,18 @@ export function createBoardRouter(boardService: BoardService) {
 			res.status(500).json({ error: `${error}` });
 		}
 	});
-
 	// Получение всех досок пользователя
-	router.get('/boards/:userId', async (req, res) => {
+	router.get('/boards/:projectId', async (req, res) => {
 		try {
-			const userId = req.params.userId;
-			const boards = await boardService.getBoardsByUserId(parseInt(userId)); //TODO Сделать проверку на строку
-			res.status(200).json(boards);
+			const userId = req.query.userId;
+			const projectId = req.params.projectId;
+			if (!userId || typeof userId !== 'string') {
+				res.status(400).json({ error: "Invalid userId" });
+			}
+			else {
+				const boards = await boardService.getBoardsByProject(parseInt(projectId), parseInt(userId)); //TODO Сделать проверку на строку
+				res.status(200).json(boards);
+			}
 		} catch (error) {
 			res.status(500).json({ error: `${error}` });
 		}
@@ -60,7 +65,7 @@ export function createBoardRouter(boardService: BoardService) {
 	router.delete("/boards/:id", async (req, res) => {
 		try {
 			const boardId = req.params.id;
-			const success = await boardService.deleteBoard(parseInt(boardId));
+			const success = await boardService.deleteBoard(req.body.user.id, parseInt(boardId));
 			if (success) {
 				res.status(204).send();
 			} else {

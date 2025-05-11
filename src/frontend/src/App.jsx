@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Board from "./pages/board";
+import Projects from "./pages/projects";
 import Users from "./pages/users";
 import { Login } from "./pages/login";
 import { Register } from "./pages/register";
@@ -14,11 +15,13 @@ function App() {
         <Header />
         <main style={{ flex: 1 }}>
           <Routes>
-            <Route path="/" element={<Navigate to="/board" />} />
+            <Route path="/" element={<Navigate to="/projects" />} />
             <Route path="/user" element={<Users />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route element={<ProtectedRoute />}>
+              <Route path="/projects" element={<Projects />} />
+              <Route path="/project/:projectId" element={<Boards />} />
               <Route path="/boards" element={<Boards />} />
               <Route path="/boards/:boardId" element={<Board />} />
             </Route>

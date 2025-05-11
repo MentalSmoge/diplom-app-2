@@ -25,43 +25,43 @@ export class UserService {
 
 	// Получение пользователя по ID
 	async getUserById(userId: string): Promise<UserDTO | null> {
-		const cacheKey = `user:${userId}`;
-		const cachedUser = await this.redisClient.get(cacheKey);
-		if (cachedUser) {
-			console.log("Cached " + userId)
-			return JSON.parse(cachedUser);
-		}
+		// const cacheKey = `user:${userId}`;
+		// const cachedUser = await this.redisClient.get(cacheKey);
+		// if (cachedUser) {
+		// 	console.log("Cached " + userId)
+		// 	return JSON.parse(cachedUser);
+		// }
 		const user = await this.userRepository.getUserById(userId);
 		if (!user) return null;
 
-		await this.redisClient.setEx(cacheKey, 300, JSON.stringify(user));
+		// await this.redisClient.setEx(cacheKey, 300, JSON.stringify(user));
 		return user;
 	}
 
 	async getUserByEmail(email: string): Promise<UserDTO | null> {
-		const cacheKey = `user:${email}`;
-		const cachedUser = await this.redisClient.get(cacheKey);
-		if (cachedUser) {
-			console.log("Cached " + email)
-			return JSON.parse(cachedUser);
-		}
+		// const cacheKey = `user:${email}`;
+		// const cachedUser = await this.redisClient.get(cacheKey);
+		// if (cachedUser) {
+		// 	console.log("Cached " + email)
+		// 	return JSON.parse(cachedUser);
+		// }
 		const user = await this.userRepository.getUserByEmailAuth(email);
 		if (!user) return null;
 
-		await this.redisClient.setEx(cacheKey, 300, JSON.stringify(user));
+		// await this.redisClient.setEx(cacheKey, 300, JSON.stringify(user));
 		return user;
 	}
 
 	// Получение всех пользователей
 	async getAllUsers(): Promise<UserDTO[]> {
-		const cacheKey = "users:all";
-		const cachedUsers = await this.redisClient.get(cacheKey);
-		if (cachedUsers) {
-			console.log("Cached " + cachedUsers)
-			return JSON.parse(cachedUsers);
-		}
+		// const cacheKey = "users:all";
+		// const cachedUsers = await this.redisClient.get(cacheKey);
+		// if (cachedUsers) {
+		// 	console.log("Cached " + cachedUsers)
+		// 	return JSON.parse(cachedUsers);
+		// }
 		const users = await this.userRepository.getAllUsers();
-		await this.redisClient.setEx(cacheKey, 300, JSON.stringify(users.map(user => user)));
+		// await this.redisClient.setEx(cacheKey, 300, JSON.stringify(users.map(user => user)));
 		return users.map(user => user);
 	}
 

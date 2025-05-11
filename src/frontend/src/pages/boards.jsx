@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { checkAuth } from "../api/auth";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 function Boards() {
+    const { projectId } = useParams(); // Получаем ID проекта из URL
     const [boards, setBoards] = useState([]);
     const navigate = useNavigate();
 
@@ -20,7 +21,7 @@ function Boards() {
             return isAuthenticated.data
         };
 
-        verifyAuth().then((data) => fetch(`http://localhost:8080/boards/${data.id}`))
+        verifyAuth().then((data) => fetch(`http://localhost:8080/boards/${projectId}?userId=${data.id}`))
             .then((response) => response.json())
             .then((data) => { console.log(data); setBoards(data) })
             .catch((error) => console.error("Error fetching Boards:", error));

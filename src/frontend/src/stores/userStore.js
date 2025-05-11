@@ -18,8 +18,8 @@ class UserStore {
         try {
             const userData = await checkAuth();
             if (userData) {
-                console.log("SDASDA")
-                console.log(userData)
+                // console.log("SDASDA")
+                // console.log(userData)
                 this.setUser(userData.data);
             }
         } catch (error) {
@@ -32,8 +32,8 @@ class UserStore {
     }
 
     setUser(user) {
-        console.log("store")
-        console.log(user)
+        // console.log("store")
+        // console.log(user)
         this.user = user;
         this.error = null;
     }
@@ -43,8 +43,8 @@ class UserStore {
     }
 
     get isAuthenticated() {
-        console.log("store")
-        console.log(!!this.user)
+        // console.log("store")
+        // console.log(!!this.user)
         return !!this.user;
     }
 }

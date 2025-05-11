@@ -20,7 +20,10 @@ import { AuthService } from "./application/auth_service";
 import cookieParser from 'cookie-parser';
 import { PostgreSQLBoardRepository } from "./infrastructure/boards_repository";
 import { createBoardRouter } from "./framework/board_routes";
+import { createProjectRouter } from "./framework/projects_routes";
 import { PostgreSQLElementRepository } from "./infrastructure/elements_repository_postgre";
+import { PostgreSQLProjectRepository } from "./infrastructure/projects_repository";
+import { ProjectService } from "./application/project_service";
 
 const port = process.env.USERS_PORT || 8080;
 const app = express();
@@ -51,9 +54,11 @@ async function startUsersServer() {
     const elementRepository_new = new PostgreSQLElementRepository(pool); //НОВЫЙ
     const userRepository = new PostgreSQLUserRepository(pool);
     const boardRepository = new PostgreSQLBoardRepository(pool);
+    const projectRepository = new PostgreSQLProjectRepository(pool);
     // Сервисы
     const userService = new UserService(userRepository, redisClient);
-    const boardService = new BoardService(boardRepository);
+    const projectService = new ProjectService(projectRepository, boardRepository);
+    const boardService = new BoardService(boardRepository, projectService);
     const authService = new AuthService(userRepository);
     const elementService = new ElementService(elementRepository_new);
     await elementService.initialize();
@@ -62,6 +67,7 @@ async function startUsersServer() {
     app.use("/", createUserRouter(userService));
     app.use("/", createAuthRouter(userService, authService, boardService));
     app.use("/", createBoardRouter(boardService));
+    app.use("/", createProjectRouter(projectService));
 
 
 

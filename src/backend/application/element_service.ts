@@ -7,13 +7,16 @@ export class ElementService {
     async initialize(): Promise<void> {
         await this.elementRepository.initialize();
         this.elements = await this.elementRepository.loadInitialState();
+        console.log(this.elements, "THIS ELEMENTS")
     }
 
     getElements(): Element[] {
         return this.elements;
     }
     async getElementsByBoard(boardId: string): Promise<Element[]> {
-        const existingElements = this.elements.filter((el) => el.boardId === boardId);
+        const existingElements = this.elements.filter((el) => el.boardId === Number(boardId));
+        console.log(this.elements)
+        console.log(existingElements, "THIS EXISTING ELEMENTS")
         return existingElements;
     }
 
@@ -44,5 +47,5 @@ export class ElementService {
 export interface ElementDTO {
     id: string;
     type: string;
-    boardId: string;
+    boardId: number;
 }

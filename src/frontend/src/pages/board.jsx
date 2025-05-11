@@ -28,20 +28,38 @@ const Board = observer(() => {
 	const [loading, setLoading] = useState(true);
 	const navigate = useNavigate();
 	const connectToBoard = () => {
+
+
+		return () => {
+			// Отписываемся от всех событий при размонтировании
+		};
+	}
+
+	const effectRan = useRef(false)
+	useEffect(() => {
+		console.log("Connecting")
+		console.log(isConnected)
 		const onConnect = () => {
 			setIsConnected(true);
 			socket.emit("join-board", boardId);
+			console.log("emitting")
 		};
 		const onDisconnect = () => {
+			console.log("disconnecting")
 			setIsConnected(false);
 		};
 		socket.on("connect", onConnect);
 		socket.on("disconnect", onDisconnect);
-		if (!isConnected) {
+		// if (!isConnected) {
+		// 	console.log("wait im not connected", socket)
+		// 	socket.connect();
+		// }
+		if (socket.disconnected) {
 			socket.connect();
+			console.log("wait im not connected", socket)
 		}
-
 		const handleBoardState = (serverElements) => {
+			console.log("board stating", serverElements)
 			setElements(serverElements);
 		};
 
@@ -63,21 +81,6 @@ const Board = observer(() => {
 		socket.on("element-created", handleElementCreated);
 		socket.on("element-updated", handleElementUpdated);
 		socket.on("element-deleted", handleElementDeleted);
-
-		return () => {
-			// Отписываемся от всех событий при размонтировании
-			socket.off("connect", onConnect);
-			socket.off("disconnect", onDisconnect);
-			socket.off("board-state", handleBoardState);
-			socket.off("element-created", handleElementCreated);
-			socket.off("element-updated", handleElementUpdated);
-			socket.off("element-deleted", handleElementDeleted);
-			socket.emit("leave-board", boardId);
-		};
-	}
-
-	const effectRan = useRef(false)
-	useEffect(() => {
 		if (selectedIds.length && transformerRef.current) {
 			// Get the nodes from the refs Map
 			const nodes = selectedIds
@@ -89,7 +92,8 @@ const Board = observer(() => {
 			// Clear selection
 			transformerRef.current.nodes([]);
 		}
-		if (effectRan.current === true) { return }
+		// if (effectRan.current === true) { return }
+		// connectToBoard()
 		// Проверяем аутентификацию при загрузке компонента
 		const getAccessLevel = async () => {
 			const isAuthenticated = await checkBoardAccess(parseInt(boardId));
@@ -101,11 +105,21 @@ const Board = observer(() => {
 				navigate('/login');
 				return;
 			}
-			connectToBoard(isAuthenticated.data)
+			console.log("all good, connecting", isAuthenticated.data)
+			// connectToBoard(isAuthenticated.data)
 		};
 		getAccessLevel();
 		return () => {
 			effectRan.current = true;
+			console.log("Disconnecting socket...");
+			socket.off("connect", onConnect);
+			socket.off("disconnect", onDisconnect);
+			socket.off("board-state", handleBoardState);
+			socket.off("element-created", handleElementCreated);
+			socket.off("element-updated", handleElementUpdated);
+			socket.off("element-deleted", handleElementDeleted);
+			socket.emit("leave-board", boardId);
+			socket.disconnect(); // Отключаем сокет
 		};
 	}, [boardId, navigate, selectedIds]);
 
