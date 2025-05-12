@@ -1,0 +1,211 @@
+.modal {
+  --pos: 30%;
+  border: 2px solid black;
+  border-radius: var(--rounding);
+  border-color: black;
+  position: absolute;
+  top: var(--pos);
+  /* left: var(--pos); */
+  left: 40%;
+  right: var(--pos);
+  bottom: var(--pos);
+  font-size: 24px;
+  background: var(--node-color);
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  width: 400px;
+  height: 300px;
+  --flow-background-color: #fff9ec;
+  --node-color: #ffffff;
+  --node-text-color: #FFDCCC;
+  --handle-color: #5D2A42;
+  --delete-button-color: #f44336;
+  --good-button-color: #4CAF50;
+  --neutral-button-color: #FFDCCC;
+  --active-button-color: #ffffff;
+}
+
+.modal>.input {
+  margin: 1rem;
+  font: inherit;
+  font-size: large;
+}
+
+.modal>.p {
+  margin: 0;
+  align-self: center;
+}
+
+.modal>.header {
+  width: 100%;
+  border-radius: 10px;
+  border-bottom: 1px solid gray;
+  background-color: var(--neutral-button-color);
+  font-size: 24px;
+  text-align: center;
+  padding: 5px 0px;
+  margin-bottom: 1rem;
+  margin-top: 0;
+}
+
+.modal>.button-row {
+  display: flex;
+  align-self: center;
+  justify-self: end;
+  width: 80%;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.modal>.button-row>.add,
+.modal>.button-row>.delete,
+.modal>.button-row>.close {
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  padding: 5px 5px;
+  margin: 0 0rem 1rem 0rem;
+  line-height: 20px;
+  font-size: 18px;
+  font: inherit;
+  background: var(--neutral-button-color);
+  border-radius: var(--rounding);
+  border: 1px solid #000000;
+}
+
+.modal>.button-row>.add {
+  background: var(--good-button-color);
+  color: white;
+}
+
+.modal>.button-row>.delete {
+  background: var(--delete-button-color);
+}
+
+.modal>.button-row>.close {
+  background: var(--delete-button-color);
+  color: white;
+}
+
+.modal>.textArea {
+  font: inherit;
+  font-size: medium;
+  height: 100%;
+  margin: 1rem;
+  resize: none;
+  flex-grow: 1;
+  box-sizing: border-box;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  overflow-y: auto;
+
+  flex-direction: column;
+}
+
+
+:root {
+  --scrollbar-size-modal: 1rem;
+}
+
+.modal>.textArea::-webkit-scrollbar {
+  height: var(--scrollbar-size-modal);
+  width: var(--scrollbar-size-modal);
+}
+
+.modal>.textArea::-webkit-scrollbar-track {
+  background-color: var(--scrollbar-track-color);
+}
+
+.modal>.textArea::-webkit-scrollbar:hover {
+  background-color: rgba(0, 0, 0, .1);
+  cursor: pointer;
+}
+
+.modal>.textArea::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-color);
+  /* Если нужно - добавьте :hover и:active */
+}
+
+.modal>.textArea::-webkit-scrollbar-thumb:vertical {
+  min-height: var(--scrollbar-minlength);
+}
+
+.modal>.textArea::-webkit-scrollbar-thumb:horizontal {
+  min-width: var(--scrollbar-minlength);
+}
+
+.modal-big {
+  --pos: 20%;
+}
+
+.auth-modal {
+  width: 400px;
+  height: 400px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.add-modal {
+  width: 400px;
+  height: 400px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.register-modal {
+  width: 400px;
+  height: 570px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.show-password-text {
+  font-size: 16px;
+  color: black;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  margin-left: 12px;
+}
+
+.show-password-text {
+  margin-left: 5px;
+  pointer-events: none;
+}
+
+.yet_account {
+  font-size: 16px !important;
+  color: black !important;
+}
+
+.message_reg {
+  text-align: center;
+}
+
+.proj-modal {
+  width: 600px;
+  height: 500px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.del-modal {
+  width: 70%;
+  height: 200px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

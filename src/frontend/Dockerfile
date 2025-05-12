@@ -4,7 +4,7 @@ WORKDIR /app_frontend
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm install & npm cache clean --force
 
 COPY . .
 

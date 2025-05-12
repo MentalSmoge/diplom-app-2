@@ -15,7 +15,7 @@ export class CreateProjectCommand {
 }
 
 export interface ProjectRepository {
-    createProject(project: Project): Promise<void>;
+    createProject(project: Project): Promise<number>;
     getProjectById(id: number): Promise<Project | null>;
     getProjectsByUserId(userId: number): Promise<ProjectDTO[] | null>;
     updateProject(project: Project): Promise<void>;

@@ -16,14 +16,8 @@ export class ProjectService {
             creator_id: command.creator_id
         };
 
-        await this.projectRepository.createProject(project);
-
-        // Add creator as editor
-        await this.projectRepository.addUserToProject(
-            command.creator_id,
-            project.id,
-            3
-        );
+        const created_id = await this.projectRepository.createProject(project);
+        project.id = created_id
 
         return project;
     }

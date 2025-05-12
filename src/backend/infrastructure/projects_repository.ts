@@ -4,11 +4,20 @@ import { Project, ProjectDTO, ProjectRepository } from "../domain/project";
 export class PostgreSQLProjectRepository implements ProjectRepository {
     constructor(private pool: InstanceType<typeof Pool>) { }
 
-    async createProject(project: Project): Promise<void> {
-        await this.pool.query(
-            "WITH new_project AS (INSERT INTO projects(title, description, creation_date) VALUES($1, $2, $3)RETURNING id) INSERT INTO project_users(user_id, project_id, role) SELECT $4, id, 3 FROM new_project;",
+    async createProject(project: Project): Promise<number> {
+        const result = await this.pool.query<{ id: number }>(
+            `WITH new_project AS (
+            INSERT INTO projects(title, description, creation_date) 
+            VALUES($1, $2, $3) 
+            RETURNING id
+        ) 
+        INSERT INTO project_users(user_id, project_id, role) 
+        SELECT $4, id, 3 FROM new_project
+        RETURNING (SELECT id FROM new_project) AS id`,
             [project.title, project.description, project.creation_date, project.creator_id]
         );
+
+        return result.rows[0].id;
     }
 
     async getProjectById(id: number): Promise<Project | null> {
