@@ -5,8 +5,8 @@ WORKDIR /app_backend
 COPY package*.json ./
 
 RUN npm install --include=dev
-RUN npm install --only=dev
 RUN npm install -g ts-node
+RUN npm run build
 
 COPY . .
 
@@ -14,4 +14,4 @@ ENV PORT=8080
 
 EXPOSE 8080 8082
 
-CMD ["npm", "start"]
+CMD ["npm", "start_cool"]
