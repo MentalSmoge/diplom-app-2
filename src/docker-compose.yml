@@ -5,7 +5,7 @@ services:
         container_name: monolith_frontend
         environment:
             NODE_ENV: development
-            WATCHPACK_POLLING: true
+            WATCHPACK_POLLING: "true"
         build: frontend/
         volumes:
             - ./frontend:/app_frontend
