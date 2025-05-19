@@ -19,7 +19,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node dist/server.js / sleep 30",
     "start_cool": "ts-node ./server.ts"
   },
   "devDependencies": {
