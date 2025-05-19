@@ -9,7 +9,12 @@
     "rethinkdb": "^2.4.2",
     "socket.io": "^4.8.1",
     "ts-node": "^10.9.2",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/express": "^5.0.1",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/pg": "^8.11.11",
+    "@types/rethinkdb": "^2.3.21"
   },
   "scripts": {
     "start": "ts-node ./server.ts"
