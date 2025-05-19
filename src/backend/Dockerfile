@@ -10,7 +10,9 @@ RUN npm install -g ts-node
 
 
 COPY . .
-RUN npm run build
+RUN npm run build && \
+    ls -la dist/ && \
+    [ -f dist/server.js ] || (echo "Файл server.js не найден!" && exit 1)
 
 ENV PORT=8080
 
