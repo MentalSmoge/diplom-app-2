@@ -1,4 +1,4 @@
-name: monolith
+version: '3.3'
 services:
     frontend:
         image: mentalsmoge/frontend:latest
