@@ -67,6 +67,7 @@ export class ProjectService {
     }
 
     async getUserRoleInProject(userId: number, projectId: number): Promise<number> {
+        console.log(userId, projectId, "SSS")
         return this.projectRepository.getUserRoleInProject(userId, projectId);
     }
 }

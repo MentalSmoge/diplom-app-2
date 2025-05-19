@@ -1,15 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { checkAuth } from "../api/auth";
 import { useParams, useNavigate } from "react-router-dom";
+import ProjectCard from "../components/projectCard";
+import AddBoardModal from "../components/modals/modal_addBoard"
+import AddBoardModalStore from "../components/modals/modal_addBoard/store_addBoard"
+import BoardsStore from "./store_boards"
+import DeleteModal from "../components/modals/modal_delete"
+import DeleteModalStore from "../components/modals/modal_delete/DeleteModalStore"
+import { observer } from 'mobx-react-lite';
 
 function Boards() {
     const { projectId } = useParams(); // Получаем ID проекта из URL
-    const [boards, setBoards] = useState([]);
     const navigate = useNavigate();
 
 
     const handleBoardButton = (boardId) => {
         navigate(`/boards/${boardId}`);
+    }
+    const handleCreateButton = () => {
+        AddBoardModalStore.openEditor()
+    }
+    const handleDeleteButton = (projectId) => {
+        DeleteModalStore.openEditor("Board", projectId)
     }
     useEffect(() => {
         const verifyAuth = async () => {
@@ -23,20 +35,43 @@ function Boards() {
 
         verifyAuth().then((data) => fetch(`http://localhost:8080/boards/${projectId}?userId=${data.id}`))
             .then((response) => response.json())
-            .then((data) => { console.log(data); setBoards(data) })
+            .then((data) => { console.log(data); BoardsStore.setBoards(data) })
             .catch((error) => console.error("Error fetching Boards:", error));
     }, []);
 
     return (
-        <div>
-            <h1>Boards</h1>
-            <ul>
-                {boards.map((board) => (
-                    <li key={board.id}>id = {board.id}, title = {board.title}, access level = {board.access_level}<button onClick={() => handleBoardButton(board.id)}>Open</button></li>
+        <div className="projects-container">
+            <AddBoardModal projectId={projectId} />
+            <DeleteModal type="Board" />
+
+            <DeleteModal type="Project" />
+            <div className="projects-header">
+                <h2 className="projects-title">Доски в проекте</h2>
+                <button className="create-project-btn" onClick={() => handleCreateButton()}>
+                    Создать доску
+                </button>
+            </div>
+            <div className="projects-grid">
+                {BoardsStore.boards.map((project) => (
+                    <ProjectCard
+                        title={project.title}
+                        description=""
+                        onOpen={() => handleBoardButton(project.id)}
+                        onDelete={() => handleDeleteButton(project.id)}
+                        key={project.id}
+                    />
                 ))}
-            </ul>
+            </div>
         </div>
+        // <div>
+        //     <h1>Boards</h1>
+        //     <ul>
+        //         {boards.map((board) => (
+        //             <li key={board.id}>id = {board.id}, title = {board.title}, access level = {board.access_level}<button onClick={() => handleBoardButton(board.id)}>Open</button></li>
+        //         ))}
+        //     </ul>
+        // </div>
     );
 }
 
-export default Boards;
+export default observer(Boards);

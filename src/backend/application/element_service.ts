@@ -36,9 +36,9 @@ export class ElementService {
 
     async deleteElement(elementId: string): Promise<void> {
         const existingElement = this.elements.find((el) => el.id === elementId);
-        if (!existingElement) {
-            throw new Error('Element not found');
-        }
+        // if (!existingElement) {
+        //     throw new Error('Element not found');
+        // }
         this.elements = this.elements.filter((el) => el.id !== elementId);
         await this.elementRepository.deleteElement(elementId);
     }

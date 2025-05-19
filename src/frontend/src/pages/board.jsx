@@ -13,6 +13,7 @@ import * as utils_export from "../utils/utils_export"
 
 const Board = observer(() => {
 	const { boardId } = useParams(); // Получаем ID доски из URL
+	const [numberBoardId, setNumberBoardId] = useState(Number(boardId))
 	const [elements, setElements] = useState([]);
 	const [selectedIds, setSelectedIds] = useState([]);
 	const [selectionRectangle, setSelectionRectangle] = useState({
@@ -37,6 +38,7 @@ const Board = observer(() => {
 
 	const effectRan = useRef(false)
 	useEffect(() => {
+		// if (effectRan.current === true) { return }
 		console.log("Connecting")
 		console.log(isConnected)
 		const onConnect = () => {
@@ -64,10 +66,12 @@ const Board = observer(() => {
 		};
 
 		const handleElementCreated = (element) => {
+			console.log("handleElementCreated")
 			setElements((prev) => [...prev, element]);
 		};
 
 		const handleElementUpdated = (element) => {
+			console.log("Изменился")
 			setElements((prev) =>
 				prev.map((el) => (el.id === element.id ? element : el))
 			);
@@ -92,11 +96,10 @@ const Board = observer(() => {
 			// Clear selection
 			transformerRef.current.nodes([]);
 		}
-		// if (effectRan.current === true) { return }
 		// connectToBoard()
 		// Проверяем аутентификацию при загрузке компонента
 		const getAccessLevel = async () => {
-			const isAuthenticated = await checkBoardAccess(parseInt(boardId));
+			const isAuthenticated = await checkBoardAccess(numberBoardId);
 			if (isAuthenticated === null) {
 				navigate('/login');
 				return;
@@ -118,7 +121,7 @@ const Board = observer(() => {
 			socket.off("element-created", handleElementCreated);
 			socket.off("element-updated", handleElementUpdated);
 			socket.off("element-deleted", handleElementDeleted);
-			socket.emit("leave-board", boardId);
+			socket.emit("leave-board", numberBoardId);
 			socket.disconnect(); // Отключаем сокет
 		};
 	}, [boardId, navigate, selectedIds]);
@@ -140,7 +143,7 @@ const Board = observer(() => {
 	const addRectangle = () => {
 		const newElement = {
 			id: Date.now().toString(),
-			boardId: boardId,
+			boardId: numberBoardId,
 			type: "rect",
 			x: 100,
 			y: 100,
@@ -156,7 +159,7 @@ const Board = observer(() => {
 	const addText = () => {
 		const newElement = {
 			id: Date.now().toString(),
-			boardId: boardId,
+			boardId: numberBoardId,
 			type: "text",
 			text: "Enter text...",
 			x: 100,
@@ -172,7 +175,7 @@ const Board = observer(() => {
 	const addArrow = () => {
 		const newElement = {
 			id: Date.now().toString(),
-			boardId: boardId,
+			boardId: numberBoardId,
 			type: "arrow",
 			x_start: 100,
 			y_start: 100,
@@ -190,7 +193,7 @@ const Board = observer(() => {
 	};
 
 	const handleDragStart = (e) => {
-		console.log(e.target)
+		// console.log(e.target)
 		const id = e.target.id();
 		setElements(
 			elements.map((element) => {
@@ -392,7 +395,7 @@ const Board = observer(() => {
 
 	return (
 		<div>
-			<div>Current Board: {boardId}</div>
+			{/* <div>Current Board: {boardId}</div> */}
 			<button onClick={addArrow}>Add Arrow</button>
 			<button onClick={addText}>Add Text</button>
 			<button onClick={addRectangle}>Add Rectangle</button>

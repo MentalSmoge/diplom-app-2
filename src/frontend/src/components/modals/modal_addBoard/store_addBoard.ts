@@ -1,25 +1,24 @@
 import { makeAutoObservable } from "mobx"
-import store_projects from "../../../pages/store_projects"
+import store_boards from "../../../pages/store_boards"
 
-class AddProjectModalStore {
+class AddBoardModalStore {
   isOpen = false
 
   currentNewName = ""
-  currentDescription = ""
 
   constructor() {
     makeAutoObservable(this)
   }
 
-  async addProject(userId: unknown) {
-    const response = await fetch('http://localhost:8080/projects', {
+  async addBoard(userId: unknown, projectId: unknown) {
+    const response = await fetch('http://localhost:8080/boards', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         title: this.currentNewName,
-        description: this.currentDescription,
+        project_id: projectId,
         user_id: userId
       })
     });
@@ -29,29 +28,23 @@ class AddProjectModalStore {
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
-    store_projects.addProject(j)
+    store_boards.addBoard(j)
     this.closeEditor()
   }
 
   openEditor() {
-    this.currentNewName = "Проект"
-    this.currentDescription = "Описание"
+    this.currentNewName = "Доска"
     this.isOpen = true
   }
 
   closeEditor() {
     this.isOpen = false
     this.currentNewName = ""
-    this.currentDescription = ""
   }
 
   changeName(newName: string) {
     this.currentNewName = newName
   }
-
-  changeDescription(value: string): void {
-    this.currentDescription = value
-  }
 }
 
-export default new AddProjectModalStore()
+export default new AddBoardModalStore()

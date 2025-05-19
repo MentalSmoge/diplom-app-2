@@ -16,7 +16,9 @@ class ProjectsStore {
         console.log(project)
         this.projects.push(project)
     }
-    // deleteProject()
+    deleteProject(id: number) {
+        this.projects = this.projects.filter(project => project.id !== id)
+    }
 }
 
 export default new ProjectsStore()

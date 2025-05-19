@@ -84,6 +84,7 @@ export class PostgreSQLProjectRepository implements ProjectRepository {
             "SELECT role FROM project_users WHERE user_id = $1 AND project_id = $2",
             [userId, projectId]
         );
+        console.log(result.rows[0], "WOW")
 
         if (result.rows.length === 0) {
             return 0;

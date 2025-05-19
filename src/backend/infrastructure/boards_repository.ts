@@ -4,11 +4,12 @@ import { Board, BoardRepository } from "../domain/board";
 export class PostgreSQLBoardRepository implements BoardRepository {
     constructor(private pool: InstanceType<typeof Pool>) { }
 
-    async addBoard(board: Board): Promise<void> {
-        await this.pool.query(
-            "INSERT INTO boards(id, title, project_id) VALUES($1, $2, $3)",
-            [board.id, board.title, board.project_id]
+    async addBoard(board: Board): Promise<number> {
+        const result = await this.pool.query(
+            "INSERT INTO boards(title, project_id) VALUES($1, $2) RETURNING id",
+            [board.title, board.project_id]
         );
+        return result.rows[0].id;
     }
 
     async getBoardById(id: number): Promise<Board | null> {

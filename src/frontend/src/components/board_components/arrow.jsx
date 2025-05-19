@@ -42,7 +42,7 @@ const Edge = ({ nodeStart, nodeEnd }) => {
                 strokeWidth={2}
                 pointerWidth={6}
             />
-            <Text
+            {/* <Text
                 fill="red"
                 x={(nodeEnd.x + nodeStart.x) / 2 - 100}
                 y={(nodeEnd.y + nodeStart.y) / 2 - 100}
@@ -51,7 +51,7 @@ const Edge = ({ nodeStart, nodeEnd }) => {
                 align="center"
                 verticalAlign="middle"
                 text={text}
-            />
+            /> */}
         </Group>
     );
 };

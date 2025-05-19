@@ -1,4 +1,5 @@
 import { BoardRepository, Board, CreateBoardCommand, BoardDTO, UpdateBoardCommand } from '../domain/board';
+import { Project } from '../domain/project';
 import { ProjectService } from './project_service';
 
 export class BoardService {
@@ -7,15 +8,21 @@ export class BoardService {
         private projectService: ProjectService
     ) { }
 
-    async createBoard(command: CreateBoardCommand): Promise<void> {
+    async createBoard(command: CreateBoardCommand): Promise<Board> {
         // Проверяем, есть ли у пользователя доступ к проекту
+        console.log("ВЫЗЫВАЮ ИЗ CREATE")
         const userRole = await this.projectService.getUserRoleInProject(command.user_id, command.project_id);
+        console.log(userRole, "ROLE")
         if (!userRole || userRole < 3) { // 3 - минимальный уровень доступа
             throw new Error("User doesn't have permission to create boards in this project");
         }
         const board = new Board(0, command.title, command.project_id);
         // await this.redisClient.del("boards:all");
-        await this.boardRepository.addBoard(board);
+        const created_id = await this.boardRepository.addBoard(board);
+        board.id = created_id
+
+        return board;
+
     }
 
     async getBoardById(boardId: number, userId: number): Promise<Board | null> {
@@ -27,7 +34,8 @@ export class BoardService {
         // }
         const board = await this.boardRepository.getBoardById(boardId);
         if (!board) return null;
-        const accessLevel = await this.projectService.getUserRoleInProject(userId, boardId);
+        console.log("ВЫЗЫВАЮ ИЗ getBoardById")
+        const accessLevel = await this.projectService.getUserRoleInProject(userId, board.project_id);
         if (accessLevel === 0) {
             throw new Error("User doesn't have permission to view this board");
         }
@@ -36,14 +44,23 @@ export class BoardService {
     }
 
     async checkUserAccessToBoard(userId: number, boardId: number): Promise<number> {
-        const accessLevel = await this.projectService.getUserRoleInProject(userId, boardId);
-        console.log("access_level")
-        console.log(accessLevel)
-        if (accessLevel === null) return 0
-        return accessLevel
+        console.log("ВЫЗЫВАЮ ИЗ checkUserAccessToBoard")
+        const board = await this.boardRepository.getBoardById(boardId);
+        if (!board) {
+            return 0;
+        }
+        console.log("ВЫЗЫВАЮ ИЗ getProjectByBoardId")
+        const userRole = await this.projectService.getUserRoleInProject(userId, board.project_id);
+        if (!userRole) {
+            throw new Error("User doesn't have permission to view this project");
+        }
+        console.log(userRole)
+        if (userRole === null) return 0
+        return userRole
     } //TODO Выкинуть со страницы если разлогинишься
 
     async getBoardsByProject(projectId: number, userId: number): Promise<Board[]> {
+        console.log("ВЫЗЫВАЮ ИЗ getBoardsByProject")
         // Проверяем доступ пользователя к проекту
         const userRole = await this.projectService.getUserRoleInProject(userId, projectId);
         if (!userRole) {
@@ -73,12 +90,29 @@ export class BoardService {
 
     // Удаление доски
     async deleteBoard(userId: number, boardId: number): Promise<boolean> {
+        console.log(userId, boardId, "ADSDA")
         // Проверяем доступ пользователя
+        const project = await this.getProjectByBoardId(boardId, userId)
+        if (project === null) throw new Error("Project not found");
         const accessLevel = await this.checkUserAccessToBoard(userId, boardId);
         if (accessLevel < 3) { // 3 - уровень доступа для удаления
             throw new Error("User doesn't have permission to delete this board");
         }
 
         return this.boardRepository.deleteBoard(boardId);
+    }
+    async getProjectByBoardId(boardId: number, userId: number): Promise<Project | null> {
+        const board = await this.boardRepository.getBoardById(boardId);
+        if (!board) {
+            return null;
+        }
+        console.log("ВЫЗЫВАЮ ИЗ getProjectByBoardId")
+        const userRole = await this.projectService.getUserRoleInProject(userId, board.project_id);
+        if (!userRole) {
+            throw new Error("User doesn't have permission to view this project");
+        }
+
+        // Получаем проект через projectService
+        return this.projectService.getProjectById(board.project_id);
     }
 }

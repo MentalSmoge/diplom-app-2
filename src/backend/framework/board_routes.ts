@@ -8,7 +8,10 @@ export function createBoardRouter(boardService: BoardService) {
 	// Создание доски
 	router.post("/boards", async (req, res) => {
 		try {
-			const board = await boardService.createBoard(new CreateBoardCommand(req.body.title, req.body.projectId, req.body.user.id));
+			const board = await boardService.createBoard(new CreateBoardCommand(
+				req.body.title,
+				req.body.project_id,
+				req.body.user_id));
 			res.status(201).json(board);
 		} catch (error) {
 			res.status(500).json({ error: `${error}` });
@@ -64,8 +67,9 @@ export function createBoardRouter(boardService: BoardService) {
 	// Удаление доски
 	router.delete("/boards/:id", async (req, res) => {
 		try {
+			console.log(req.params.id, req.body.user_id, "DELETE")
 			const boardId = req.params.id;
-			const success = await boardService.deleteBoard(req.body.user.id, parseInt(boardId));
+			const success = await boardService.deleteBoard(req.body.user_id, parseInt(boardId));
 			if (success) {
 				res.status(204).send();
 			} else {

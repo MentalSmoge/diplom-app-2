@@ -5,6 +5,8 @@ import ProjectCard from "../components/projectCard";
 import AddProjectModal from "../components/modals/modal_addProject"
 import AddProjectModalStore from '../components/modals/modal_addProject/store_addProject';
 import ProjectsStore from "./store_projects"
+import DeleteModal from "../components/modals/modal_delete"
+import DeleteModalStore from "../components/modals/modal_delete/DeleteModalStore"
 import { observer } from 'mobx-react-lite';
 
 import './ProjectsGrid.css';
@@ -18,6 +20,9 @@ function Projects() {
     }
     const handleCreateButton = () => {
         AddProjectModalStore.openEditor()
+    }
+    const handleDeleteButton = (projectId) => {
+        DeleteModalStore.openEditor("Project", projectId)
     }
     useEffect(() => {
         const verifyAuth = async () => {
@@ -39,6 +44,7 @@ function Projects() {
     return (
         <div className="projects-container">
             <AddProjectModal />
+            <DeleteModal type="Project" />
             <div className="projects-header">
                 <h2 className="projects-title">Проекты</h2>
                 <button className="create-project-btn" onClick={() => handleCreateButton()}>
@@ -52,7 +58,7 @@ function Projects() {
                         title={project.title}
                         description={project.description}
                         onOpen={() => handleProjectButton(project.id)}
-                        onDelete={() => console.log('Удалить проект')}
+                        onDelete={() => handleDeleteButton(project.id)}
                         key={project.id}
                     />
                 ))}

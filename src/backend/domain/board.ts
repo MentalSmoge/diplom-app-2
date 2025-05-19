@@ -2,7 +2,7 @@ export class Board {
     constructor(public id: number, public title: string, public project_id: number,) { }
 }
 export interface BoardRepository {
-    addBoard(board: Board): Promise<void>;
+    addBoard(board: Board): Promise<number>;
     getBoardById(id: number): Promise<Board | null>;
     // getBoardsByUserId(userId: number): Promise<Board[] | null>;
     getBoardsByProjectId(projectId: number): Promise<Board[]>;
