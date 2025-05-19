@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './ProjectCard.css'; // Стили для компонента
+import './projectCard.css'; // Стили для компонента
 
 const ProjectCard = ({ title, description, onOpen, onDelete }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);

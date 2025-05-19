@@ -5,7 +5,7 @@ WORKDIR /app_frontend
 COPY package*.json ./
 
 RUN npm install & npm cache clean --force
-
+RUN npm install -g ts-node
 COPY . .
 
 ENV PORT_SOCKET=8082
