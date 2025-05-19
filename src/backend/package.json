@@ -17,6 +17,8 @@
     "@types/rethinkdb": "^2.3.21"
   },
   "scripts": {
+    "build": "tsc",
+    "start_cool": "node dist/server.js",
     "start": "ts-node ./server.ts"
   },
   "devDependencies": {
