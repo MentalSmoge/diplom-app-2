@@ -5,6 +5,7 @@ WORKDIR /app_backend
 COPY package*.json ./
 
 RUN npm install --include=dev
+RUN npm install --only=dev
 RUN npm install -g ts-node
 
 COPY . .
