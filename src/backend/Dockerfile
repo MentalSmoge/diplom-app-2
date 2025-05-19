@@ -1,16 +1,15 @@
-FROM node:24-alpine
+FROM node:24-alpine AS builder
 
 WORKDIR /app_backend
 
+# 1. Устанавливаем все зависимости для сборки
 COPY package*.json ./
-
 RUN npm install --include=dev
-RUN npm install -g typescript
-RUN npm install -g ts-node
 
-
+# 2. Копируем и компилируем проект
 COPY . .
 RUN npm run build
+
 # 3. Финальный образ
 FROM node:24-alpine
 WORKDIR /app_backend
