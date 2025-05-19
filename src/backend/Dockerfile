@@ -5,8 +5,10 @@ WORKDIR /app_backend
 COPY package*.json ./
 
 RUN npm install --include=dev
+RUN npm install -g typescript
 RUN npm install -g ts-node
 RUN npm run build
+
 
 COPY . .
 
