@@ -1,6 +1,7 @@
 name: monolith
 services:
     frontend:
+        image: mentalsmoge/frontend:latest
         container_name: monolith_frontend
         environment:
             NODE_ENV: development
@@ -18,6 +19,7 @@ services:
             - app-network
         command: sh -c "npm install && npm run dev"
     backend:
+        image: mentalsmoge/backend:latest
         container_name: monolith_backend
         build: backend/
         depends_on:
@@ -72,33 +74,33 @@ services:
             - app-network
         ports:
             - "5432:5432"
-    pgadmin:
-        container_name: monolith_pgadmin_container
-        image: dpage/pgadmin4:9
-        environment:
-            PGADMIN_DEFAULT_EMAIL: "mentalsmoge@gmail.com"
-            PGADMIN_DEFAULT_PASSWORD: ${DB_PASSWORD}
-            PGADMIN_CONFIG_SERVER_MODE: "False"
-        depends_on:
-            - user_db
-        volumes:
-            - pgadmin-data:/var/lib/pgadmin
-        ports:
-            - "5050:80"
-        restart: unless-stopped
-        deploy:
-            resources:
-                limits:
-                    cpus: "0.5"
-                    memory: 1G
-        networks:
-            - app-network
+    # pgadmin:
+    #     container_name: monolith_pgadmin_container
+    #     image: dpage/pgadmin4:9
+    #     environment:
+    #         PGADMIN_DEFAULT_EMAIL: "mentalsmoge@gmail.com"
+    #         PGADMIN_DEFAULT_PASSWORD: ${DB_PASSWORD}
+    #         PGADMIN_CONFIG_SERVER_MODE: "False"
+    #     depends_on:
+    #         - user_db
+    #     volumes:
+    #         - pgadmin-data:/var/lib/pgadmin
+    #     ports:
+    #         - "5050:80"
+    #     restart: unless-stopped
+    #     deploy:
+    #         resources:
+    #             limits:
+    #                 cpus: "0.5"
+    #                 memory: 1G
+    #     networks:
+    #         - app-network
 
 volumes:
     postgres-data:
-    pgadmin-data:
-    rethinkdb-data:
-    redis_data:
+        # pgadmin-data:
+        # rethinkdb-data:
+        # redis_data:
 networks:
     app-network:
         driver: bridge

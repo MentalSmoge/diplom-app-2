@@ -2,8 +2,8 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
-import * as r from "rethinkdb";
-import { RethinkDBElementRepository } from "./infrastructure/elements_repository";
+// import * as r from "rethinkdb";
+// import { RethinkDBElementRepository } from "./infrastructure/elements_repository";
 import { ElementService } from "./application/element_service";
 import { WebSocketController } from "./framework/websocket_controller";
 import { BoardService } from "./application/board_service";
@@ -43,12 +43,12 @@ async function startUsersServer() {
     const pool = createPool();
 
     // Инициализация RethinkDB
-    const rethinkConnection = await r.connect({
-        host: process.env.RETHINKDB_HOST || "localhost",
-        port: process.env.RETHINKDB_PORT
-            ? Number(process.env.RETHINKDB_PORT)
-            : 28015,
-    });
+    // const rethinkConnection = await r.connect({
+    //     host: process.env.RETHINKDB_HOST || "localhost",
+    //     port: process.env.RETHINKDB_PORT
+    //         ? Number(process.env.RETHINKDB_PORT)
+    //         : 28015,
+    // });
     // Репозитории
     // const elementRepository_old = new RethinkDBElementRepository(rethinkConnection); //СТАРЫЙ
     const elementRepository_new = new PostgreSQLElementRepository(pool); //НОВЫЙ
