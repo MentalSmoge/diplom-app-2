@@ -1,41 +1,30 @@
+-- Сначала создаем таблицы без внешних ключей
+CREATE TABLE IF NOT EXISTS users
+(
+    id integer NOT NULL,
+    name character varying(100) COLLATE pg_catalog."default",
+    email character varying(100) COLLATE pg_catalog."default",
+    password character varying(100) COLLATE pg_catalog."default",
+    CONSTRAINT users_pkey PRIMARY KEY (id)
+) TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS users
-    OWNER to postgres;
--- SEQUENCE: boards_id_seq
+CREATE TABLE IF NOT EXISTS projects
+(
+    id integer NOT NULL,
+    title character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    description text COLLATE pg_catalog."default",
+    creation_date date NOT NULL DEFAULT CURRENT_DATE,
+    CONSTRAINT projects_pkey PRIMARY KEY (id)
+) TABLESPACE pg_default;
 
--- DROP SEQUENCE IF EXISTS boards_id_seq;
-
-CREATE SEQUENCE IF NOT EXISTS boards_id_seq
+-- Затем создаем последовательности и связываем их с таблицами
+CREATE SEQUENCE IF NOT EXISTS users_id_seq
     INCREMENT 1
     START 1
     MINVALUE 1
     MAXVALUE 2147483647
     CACHE 1;
-
-ALTER SEQUENCE boards_id_seq
-    OWNED BY boards.id;
-
-ALTER SEQUENCE boards_id_seq
-    OWNER TO postgres;
--- SEQUENCE: project_users_id_seq
-
--- DROP SEQUENCE IF EXISTS project_users_id_seq;
-
-CREATE SEQUENCE IF NOT EXISTS project_users_id_seq
-    INCREMENT 1
-    START 1
-    MINVALUE 1
-    MAXVALUE 2147483647
-    CACHE 1;
-
-ALTER SEQUENCE project_users_id_seq
-    OWNED BY project_users.id;
-
-ALTER SEQUENCE project_users_id_seq
-    OWNER TO postgres;
--- SEQUENCE: projects_id_seq
-
--- DROP SEQUENCE IF EXISTS projects_id_seq;
+ALTER SEQUENCE users_id_seq OWNED BY users.id;
 
 CREATE SEQUENCE IF NOT EXISTS projects_id_seq
     INCREMENT 1
@@ -43,78 +32,32 @@ CREATE SEQUENCE IF NOT EXISTS projects_id_seq
     MINVALUE 1
     MAXVALUE 2147483647
     CACHE 1;
+ALTER SEQUENCE projects_id_seq OWNED BY projects.id;
 
-ALTER SEQUENCE projects_id_seq
-    OWNED BY projects.id;
-
-ALTER SEQUENCE projects_id_seq
-    OWNER TO postgres;
--- SEQUENCE: users_id_seq
-
--- DROP SEQUENCE IF EXISTS users_id_seq;
-
-CREATE SEQUENCE IF NOT EXISTS users_id_seq
-    INCREMENT 1
-    START 1
-    MINVALUE 1
-    MAXVALUE 2147483647
-    CACHE 1;
-
-ALTER SEQUENCE users_id_seq
-    OWNED BY users.id;
-
-ALTER SEQUENCE users_id_seq
-    OWNER TO postgres;
-
-
--- DROP TABLE IF EXISTS boards;
-
+-- Теперь можно создать таблицы, которые зависят от уже созданных
 CREATE TABLE IF NOT EXISTS boards
 (
     id integer NOT NULL DEFAULT nextval('boards_id_seq'::regclass),
     title character varying(100) COLLATE pg_catalog."default" NOT NULL,
-    project_id bigint,
+    project_id integer,
     CONSTRAINT boards_pkey PRIMARY KEY (id),
     CONSTRAINT fk_boards_project FOREIGN KEY (project_id)
         REFERENCES projects (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE
-)
+) TABLESPACE pg_default;
 
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS boards
-    OWNER to postgres;
--- Table: elements
-
--- DROP TABLE IF EXISTS elements;
-
-CREATE TABLE IF NOT EXISTS elements
-(
-    id character varying(36) COLLATE pg_catalog."default" NOT NULL,
-    type character varying(50) COLLATE pg_catalog."default" NOT NULL,
-    board_id integer NOT NULL,
-    data jsonb NOT NULL,
-    created_at timestamp without time zone DEFAULT now(),
-    updated_at timestamp without time zone DEFAULT now(),
-    CONSTRAINT elements_pkey PRIMARY KEY (id),
-    CONSTRAINT fk_elements_board FOREIGN KEY (board_id)
-        REFERENCES boards (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE CASCADE
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS elements
-    OWNER to postgres;
--- Table: project_users
-
--- DROP TABLE IF EXISTS project_users;
+CREATE SEQUENCE IF NOT EXISTS boards_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+ALTER SEQUENCE boards_id_seq OWNED BY boards.id;
 
 CREATE TABLE IF NOT EXISTS project_users
 (
-    id integer NOT NULL DEFAULT nextval('project_users_id_seq'::regclass),
+    id integer NOT NULL,
     user_id integer NOT NULL,
     project_id integer NOT NULL,
     role integer NOT NULL,
@@ -128,40 +71,39 @@ CREATE TABLE IF NOT EXISTS project_users
         REFERENCES users (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE
-)
+) TABLESPACE pg_default;
 
-TABLESPACE pg_default;
+CREATE SEQUENCE IF NOT EXISTS project_users_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+ALTER SEQUENCE project_users_id_seq OWNED BY project_users.id;
 
-ALTER TABLE IF EXISTS project_users
-    OWNER to postgres;
--- Table: projects
-
--- DROP TABLE IF EXISTS projects;
-
-CREATE TABLE IF NOT EXISTS projects
+-- И наконец таблица elements, которая зависит от boards
+CREATE TABLE IF NOT EXISTS elements
 (
-    id integer NOT NULL DEFAULT nextval('projects_id_seq'::regclass),
-    title character varying(255) COLLATE pg_catalog."default" NOT NULL,
-    description text COLLATE pg_catalog."default",
-    creation_date date NOT NULL DEFAULT CURRENT_DATE,
-    CONSTRAINT projects_pkey PRIMARY KEY (id)
-)
+    id character varying(36) COLLATE pg_catalog."default" NOT NULL,
+    type character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    board_id integer NOT NULL,
+    data jsonb NOT NULL,
+    created_at timestamp without time zone DEFAULT now(),
+    updated_at timestamp without time zone DEFAULT now(),
+    CONSTRAINT elements_pkey PRIMARY KEY (id),
+    CONSTRAINT fk_elements_board FOREIGN KEY (board_id)
+        REFERENCES boards (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE
+) TABLESPACE pg_default;
 
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS projects
-    OWNER to postgres;
--- Table: users
-
--- DROP TABLE IF EXISTS users;
-
-CREATE TABLE IF NOT EXISTS users
-(
-    id integer NOT NULL DEFAULT nextval('users_id_seq'::regclass),
-    name character varying(100) COLLATE pg_catalog."default",
-    email character varying(100) COLLATE pg_catalog."default",
-    password character varying(100) COLLATE pg_catalog."default",
-    CONSTRAINT users_pkey PRIMARY KEY (id)
-)
-
-TABLESPACE pg_default;
+-- Устанавливаем владельца для всех объектов
+ALTER TABLE users OWNER TO postgres;
+ALTER TABLE projects OWNER TO postgres;
+ALTER TABLE boards OWNER TO postgres;
+ALTER TABLE project_users OWNER TO postgres;
+ALTER TABLE elements OWNER TO postgres;
+ALTER SEQUENCE users_id_seq OWNER TO postgres;
+ALTER SEQUENCE projects_id_seq OWNER TO postgres;
+ALTER SEQUENCE boards_id_seq OWNER TO postgres;
+ALTER SEQUENCE project_users_id_seq OWNER TO postgres;
