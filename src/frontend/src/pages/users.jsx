@@ -4,7 +4,7 @@ function Users() {
 	const [users, setUsers] = useState([]);
 
 	useEffect(() => {
-		fetch("http://localhost:8080/users")
+		fetch("http://45.143.92.185:8080/users")
 			.then((response) => response.json())
 			.then((data) => setUsers(data))
 			.catch((error) => console.error("Error fetching users:", error));

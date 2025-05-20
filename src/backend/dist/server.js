@@ -28,7 +28,7 @@ const project_service_1 = require("./application/project_service");
 const port = process.env.USERS_PORT || 8080;
 const app = (0, express_1.default)();
 const corsOptions = {
-    origin: 'http://localhost:3000', // Указываем конкретный origin
+    origin: 'http://45.143.92.185:3000', // Указываем конкретный origin
     credentials: true, // Разрешаем передачу кук
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Разрешенные методы
     allowedHeaders: ['Content-Type', 'Authorization'] // Разрешенные заголовки
@@ -43,7 +43,7 @@ async function startUsersServer() {
     const pool = (0, users_repository_1.createPool)();
     // Инициализация RethinkDB
     // const rethinkConnection = await r.connect({
-    //     host: process.env.RETHINKDB_HOST || "localhost",
+    //     host: process.env.RETHINKDB_HOST || "45.143.92.185",
     //     port: process.env.RETHINKDB_PORT
     //         ? Number(process.env.RETHINKDB_PORT)
     //         : 28015,
