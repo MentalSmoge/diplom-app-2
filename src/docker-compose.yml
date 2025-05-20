@@ -101,7 +101,7 @@ volumes:
     postgres-data:
         # pgadmin-data:
         # rethinkdb-data:
-        # redis_data:
+    redis_data:
 networks:
     app-network:
         driver: bridge
