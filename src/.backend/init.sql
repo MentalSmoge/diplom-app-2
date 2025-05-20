@@ -1,3 +1,72 @@
+
+ALTER TABLE IF EXISTS public.users
+    OWNER to postgres;
+-- SEQUENCE: public.boards_id_seq
+
+-- DROP SEQUENCE IF EXISTS public.boards_id_seq;
+
+CREATE SEQUENCE IF NOT EXISTS public.boards_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+
+ALTER SEQUENCE public.boards_id_seq
+    OWNED BY public.boards.id;
+
+ALTER SEQUENCE public.boards_id_seq
+    OWNER TO postgres;
+-- SEQUENCE: public.project_users_id_seq
+
+-- DROP SEQUENCE IF EXISTS public.project_users_id_seq;
+
+CREATE SEQUENCE IF NOT EXISTS public.project_users_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+
+ALTER SEQUENCE public.project_users_id_seq
+    OWNED BY public.project_users.id;
+
+ALTER SEQUENCE public.project_users_id_seq
+    OWNER TO postgres;
+-- SEQUENCE: public.projects_id_seq
+
+-- DROP SEQUENCE IF EXISTS public.projects_id_seq;
+
+CREATE SEQUENCE IF NOT EXISTS public.projects_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+
+ALTER SEQUENCE public.projects_id_seq
+    OWNED BY public.projects.id;
+
+ALTER SEQUENCE public.projects_id_seq
+    OWNER TO postgres;
+-- SEQUENCE: public.users_id_seq
+
+-- DROP SEQUENCE IF EXISTS public.users_id_seq;
+
+CREATE SEQUENCE IF NOT EXISTS public.users_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+
+ALTER SEQUENCE public.users_id_seq
+    OWNED BY public.users.id;
+
+ALTER SEQUENCE public.users_id_seq
+    OWNER TO postgres;
+
+
 -- DROP TABLE IF EXISTS public.boards;
 
 CREATE TABLE IF NOT EXISTS public.boards
@@ -96,70 +165,3 @@ CREATE TABLE IF NOT EXISTS public.users
 )
 
 TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.users
-    OWNER to postgres;
--- SEQUENCE: public.boards_id_seq
-
--- DROP SEQUENCE IF EXISTS public.boards_id_seq;
-
-CREATE SEQUENCE IF NOT EXISTS public.boards_id_seq
-    INCREMENT 1
-    START 1
-    MINVALUE 1
-    MAXVALUE 2147483647
-    CACHE 1;
-
-ALTER SEQUENCE public.boards_id_seq
-    OWNED BY public.boards.id;
-
-ALTER SEQUENCE public.boards_id_seq
-    OWNER TO postgres;
--- SEQUENCE: public.project_users_id_seq
-
--- DROP SEQUENCE IF EXISTS public.project_users_id_seq;
-
-CREATE SEQUENCE IF NOT EXISTS public.project_users_id_seq
-    INCREMENT 1
-    START 1
-    MINVALUE 1
-    MAXVALUE 2147483647
-    CACHE 1;
-
-ALTER SEQUENCE public.project_users_id_seq
-    OWNED BY public.project_users.id;
-
-ALTER SEQUENCE public.project_users_id_seq
-    OWNER TO postgres;
--- SEQUENCE: public.projects_id_seq
-
--- DROP SEQUENCE IF EXISTS public.projects_id_seq;
-
-CREATE SEQUENCE IF NOT EXISTS public.projects_id_seq
-    INCREMENT 1
-    START 1
-    MINVALUE 1
-    MAXVALUE 2147483647
-    CACHE 1;
-
-ALTER SEQUENCE public.projects_id_seq
-    OWNED BY public.projects.id;
-
-ALTER SEQUENCE public.projects_id_seq
-    OWNER TO postgres;
--- SEQUENCE: public.users_id_seq
-
--- DROP SEQUENCE IF EXISTS public.users_id_seq;
-
-CREATE SEQUENCE IF NOT EXISTS public.users_id_seq
-    INCREMENT 1
-    START 1
-    MINVALUE 1
-    MAXVALUE 2147483647
-    CACHE 1;
-
-ALTER SEQUENCE public.users_id_seq
-    OWNED BY public.users.id;
-
-ALTER SEQUENCE public.users_id_seq
-    OWNER TO postgres;
