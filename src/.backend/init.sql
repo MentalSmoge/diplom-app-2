@@ -1,7 +1,36 @@
--- Сначала создаем таблицы без внешних ключей
+-- Сначала создаем последовательности
+CREATE SEQUENCE IF NOT EXISTS users_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+
+CREATE SEQUENCE IF NOT EXISTS projects_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+
+CREATE SEQUENCE IF NOT EXISTS boards_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+
+CREATE SEQUENCE IF NOT EXISTS project_users_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+
+-- Затем создаем таблицы в правильном порядке зависимостей
 CREATE TABLE IF NOT EXISTS users
 (
-    id integer NOT NULL,
+    id integer NOT NULL DEFAULT nextval('users_id_seq'::regclass),
     name character varying(100) COLLATE pg_catalog."default",
     email character varying(100) COLLATE pg_catalog."default",
     password character varying(100) COLLATE pg_catalog."default",
@@ -10,31 +39,13 @@ CREATE TABLE IF NOT EXISTS users
 
 CREATE TABLE IF NOT EXISTS projects
 (
-    id integer NOT NULL,
+    id integer NOT NULL DEFAULT nextval('projects_id_seq'::regclass),
     title character varying(255) COLLATE pg_catalog."default" NOT NULL,
     description text COLLATE pg_catalog."default",
     creation_date date NOT NULL DEFAULT CURRENT_DATE,
     CONSTRAINT projects_pkey PRIMARY KEY (id)
 ) TABLESPACE pg_default;
 
--- Затем создаем последовательности и связываем их с таблицами
-CREATE SEQUENCE IF NOT EXISTS users_id_seq
-    INCREMENT 1
-    START 1
-    MINVALUE 1
-    MAXVALUE 2147483647
-    CACHE 1;
-ALTER SEQUENCE users_id_seq OWNED BY users.id;
-
-CREATE SEQUENCE IF NOT EXISTS projects_id_seq
-    INCREMENT 1
-    START 1
-    MINVALUE 1
-    MAXVALUE 2147483647
-    CACHE 1;
-ALTER SEQUENCE projects_id_seq OWNED BY projects.id;
-
--- Теперь можно создать таблицы, которые зависят от уже созданных
 CREATE TABLE IF NOT EXISTS boards
 (
     id integer NOT NULL DEFAULT nextval('boards_id_seq'::regclass),
@@ -47,17 +58,9 @@ CREATE TABLE IF NOT EXISTS boards
         ON DELETE CASCADE
 ) TABLESPACE pg_default;
 
-CREATE SEQUENCE IF NOT EXISTS boards_id_seq
-    INCREMENT 1
-    START 1
-    MINVALUE 1
-    MAXVALUE 2147483647
-    CACHE 1;
-ALTER SEQUENCE boards_id_seq OWNED BY boards.id;
-
 CREATE TABLE IF NOT EXISTS project_users
 (
-    id integer NOT NULL,
+    id integer NOT NULL DEFAULT nextval('project_users_id_seq'::regclass),
     user_id integer NOT NULL,
     project_id integer NOT NULL,
     role integer NOT NULL,
@@ -73,15 +76,6 @@ CREATE TABLE IF NOT EXISTS project_users
         ON DELETE CASCADE
 ) TABLESPACE pg_default;
 
-CREATE SEQUENCE IF NOT EXISTS project_users_id_seq
-    INCREMENT 1
-    START 1
-    MINVALUE 1
-    MAXVALUE 2147483647
-    CACHE 1;
-ALTER SEQUENCE project_users_id_seq OWNED BY project_users.id;
-
--- И наконец таблица elements, которая зависит от boards
 CREATE TABLE IF NOT EXISTS elements
 (
     id character varying(36) COLLATE pg_catalog."default" NOT NULL,
@@ -96,6 +90,12 @@ CREATE TABLE IF NOT EXISTS elements
         ON UPDATE NO ACTION
         ON DELETE CASCADE
 ) TABLESPACE pg_default;
+
+-- Связываем последовательности с таблицами
+ALTER SEQUENCE users_id_seq OWNED BY users.id;
+ALTER SEQUENCE projects_id_seq OWNED BY projects.id;
+ALTER SEQUENCE boards_id_seq OWNED BY boards.id;
+ALTER SEQUENCE project_users_id_seq OWNED BY project_users.id;
 
 -- Устанавливаем владельца для всех объектов
 ALTER TABLE users OWNER TO postgres;
