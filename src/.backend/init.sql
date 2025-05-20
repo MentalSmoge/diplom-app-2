@@ -1,95 +1,95 @@
 
-ALTER TABLE IF EXISTS public.users
+ALTER TABLE IF EXISTS users
     OWNER to postgres;
--- SEQUENCE: public.boards_id_seq
+-- SEQUENCE: boards_id_seq
 
--- DROP SEQUENCE IF EXISTS public.boards_id_seq;
+-- DROP SEQUENCE IF EXISTS boards_id_seq;
 
-CREATE SEQUENCE IF NOT EXISTS public.boards_id_seq
+CREATE SEQUENCE IF NOT EXISTS boards_id_seq
     INCREMENT 1
     START 1
     MINVALUE 1
     MAXVALUE 2147483647
     CACHE 1;
 
-ALTER SEQUENCE public.boards_id_seq
-    OWNED BY public.boards.id;
+ALTER SEQUENCE boards_id_seq
+    OWNED BY boards.id;
 
-ALTER SEQUENCE public.boards_id_seq
+ALTER SEQUENCE boards_id_seq
     OWNER TO postgres;
--- SEQUENCE: public.project_users_id_seq
+-- SEQUENCE: project_users_id_seq
 
--- DROP SEQUENCE IF EXISTS public.project_users_id_seq;
+-- DROP SEQUENCE IF EXISTS project_users_id_seq;
 
-CREATE SEQUENCE IF NOT EXISTS public.project_users_id_seq
+CREATE SEQUENCE IF NOT EXISTS project_users_id_seq
     INCREMENT 1
     START 1
     MINVALUE 1
     MAXVALUE 2147483647
     CACHE 1;
 
-ALTER SEQUENCE public.project_users_id_seq
-    OWNED BY public.project_users.id;
+ALTER SEQUENCE project_users_id_seq
+    OWNED BY project_users.id;
 
-ALTER SEQUENCE public.project_users_id_seq
+ALTER SEQUENCE project_users_id_seq
     OWNER TO postgres;
--- SEQUENCE: public.projects_id_seq
+-- SEQUENCE: projects_id_seq
 
--- DROP SEQUENCE IF EXISTS public.projects_id_seq;
+-- DROP SEQUENCE IF EXISTS projects_id_seq;
 
-CREATE SEQUENCE IF NOT EXISTS public.projects_id_seq
+CREATE SEQUENCE IF NOT EXISTS projects_id_seq
     INCREMENT 1
     START 1
     MINVALUE 1
     MAXVALUE 2147483647
     CACHE 1;
 
-ALTER SEQUENCE public.projects_id_seq
-    OWNED BY public.projects.id;
+ALTER SEQUENCE projects_id_seq
+    OWNED BY projects.id;
 
-ALTER SEQUENCE public.projects_id_seq
+ALTER SEQUENCE projects_id_seq
     OWNER TO postgres;
--- SEQUENCE: public.users_id_seq
+-- SEQUENCE: users_id_seq
 
--- DROP SEQUENCE IF EXISTS public.users_id_seq;
+-- DROP SEQUENCE IF EXISTS users_id_seq;
 
-CREATE SEQUENCE IF NOT EXISTS public.users_id_seq
+CREATE SEQUENCE IF NOT EXISTS users_id_seq
     INCREMENT 1
     START 1
     MINVALUE 1
     MAXVALUE 2147483647
     CACHE 1;
 
-ALTER SEQUENCE public.users_id_seq
-    OWNED BY public.users.id;
+ALTER SEQUENCE users_id_seq
+    OWNED BY users.id;
 
-ALTER SEQUENCE public.users_id_seq
+ALTER SEQUENCE users_id_seq
     OWNER TO postgres;
 
 
--- DROP TABLE IF EXISTS public.boards;
+-- DROP TABLE IF EXISTS boards;
 
-CREATE TABLE IF NOT EXISTS public.boards
+CREATE TABLE IF NOT EXISTS boards
 (
     id integer NOT NULL DEFAULT nextval('boards_id_seq'::regclass),
     title character varying(100) COLLATE pg_catalog."default" NOT NULL,
     project_id bigint,
     CONSTRAINT boards_pkey PRIMARY KEY (id),
     CONSTRAINT fk_boards_project FOREIGN KEY (project_id)
-        REFERENCES public.projects (id) MATCH SIMPLE
+        REFERENCES projects (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE
 )
 
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS public.boards
+ALTER TABLE IF EXISTS boards
     OWNER to postgres;
--- Table: public.elements
+-- Table: elements
 
--- DROP TABLE IF EXISTS public.elements;
+-- DROP TABLE IF EXISTS elements;
 
-CREATE TABLE IF NOT EXISTS public.elements
+CREATE TABLE IF NOT EXISTS elements
 (
     id character varying(36) COLLATE pg_catalog."default" NOT NULL,
     type character varying(50) COLLATE pg_catalog."default" NOT NULL,
@@ -99,20 +99,20 @@ CREATE TABLE IF NOT EXISTS public.elements
     updated_at timestamp without time zone DEFAULT now(),
     CONSTRAINT elements_pkey PRIMARY KEY (id),
     CONSTRAINT fk_elements_board FOREIGN KEY (board_id)
-        REFERENCES public.boards (id) MATCH SIMPLE
+        REFERENCES boards (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE
 )
 
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS public.elements
+ALTER TABLE IF EXISTS elements
     OWNER to postgres;
--- Table: public.project_users
+-- Table: project_users
 
--- DROP TABLE IF EXISTS public.project_users;
+-- DROP TABLE IF EXISTS project_users;
 
-CREATE TABLE IF NOT EXISTS public.project_users
+CREATE TABLE IF NOT EXISTS project_users
 (
     id integer NOT NULL DEFAULT nextval('project_users_id_seq'::regclass),
     user_id integer NOT NULL,
@@ -121,24 +121,24 @@ CREATE TABLE IF NOT EXISTS public.project_users
     CONSTRAINT project_users_pkey PRIMARY KEY (id),
     CONSTRAINT unique_user_project UNIQUE (user_id, project_id),
     CONSTRAINT fk_project FOREIGN KEY (project_id)
-        REFERENCES public.projects (id) MATCH SIMPLE
+        REFERENCES projects (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE,
     CONSTRAINT fk_user FOREIGN KEY (user_id)
-        REFERENCES public.users (id) MATCH SIMPLE
+        REFERENCES users (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE
 )
 
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS public.project_users
+ALTER TABLE IF EXISTS project_users
     OWNER to postgres;
--- Table: public.projects
+-- Table: projects
 
--- DROP TABLE IF EXISTS public.projects;
+-- DROP TABLE IF EXISTS projects;
 
-CREATE TABLE IF NOT EXISTS public.projects
+CREATE TABLE IF NOT EXISTS projects
 (
     id integer NOT NULL DEFAULT nextval('projects_id_seq'::regclass),
     title character varying(255) COLLATE pg_catalog."default" NOT NULL,
@@ -149,13 +149,13 @@ CREATE TABLE IF NOT EXISTS public.projects
 
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS public.projects
+ALTER TABLE IF EXISTS projects
     OWNER to postgres;
--- Table: public.users
+-- Table: users
 
--- DROP TABLE IF EXISTS public.users;
+-- DROP TABLE IF EXISTS users;
 
-CREATE TABLE IF NOT EXISTS public.users
+CREATE TABLE IF NOT EXISTS users
 (
     id integer NOT NULL DEFAULT nextval('users_id_seq'::regclass),
     name character varying(100) COLLATE pg_catalog."default",
