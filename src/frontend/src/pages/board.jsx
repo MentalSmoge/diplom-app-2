@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Stage, Layer, Text, Rect, Transformer } from "react-konva";
 import { socket } from "../socket";
 import { useParams, useNavigate } from "react-router-dom";
@@ -9,10 +9,12 @@ import EdgeArrow from "../components/board_components/arrow";
 import { observer } from "mobx-react";
 import { Document, Paragraph, ImageRun, Packer, HeadingLevel } from "docx";
 import * as utils_export from "../utils/utils_export"
+import ContextMenu from '../components/contextMenu';
 import "./Toolbar.css"
 
 const Board = observer(() => {
 	const { boardId } = useParams(); // Получаем ID доски из URL
+	const [selectedColor, setSelectedColor] = useState('#e55039');
 	const [isSpacePressed, setIsSpacePressed] = useState(false);
 	const [selectedTool, setSelectedTool] = useState(null);
 	const [tempElement, setTempElement] = useState(null);
@@ -92,7 +94,12 @@ const Board = observer(() => {
 			if (e.code === 'Space') {
 				setIsSpacePressed(true);
 			}
+			// Добавляем обработчик Esc
+			if (e.key === 'Escape') {
+				setSelectedTool(null);
+			}
 		};
+
 
 		const handleKeyUp = (e) => {
 			if (e.code === 'Space') {
@@ -269,13 +276,22 @@ const Board = observer(() => {
 		});
 	};
 	const stageRef = useRef(null);
-
-	const handleDelete = () => {
+	const handleColorChange = useCallback((color) => {
+		const updatedElements = elements.map(element => {
+			if (element.id === selectedId) {
+				const updatedElement = { ...element, fill: color.hex };
+				handleUpdateElement(updatedElement);
+				return updatedElement;
+			}
+			return element;
+		});
+		setElements(updatedElements);
+	}, [elements, selectedId, handleUpdateElement]);
+	const handleDelete = useCallback(() => {
 		if (selectedId) handleDeleteElement(selectedId);
 		setShowMenu(false);
-
 		setSelectedIds([]);
-	};
+	}, [selectedId, handleDeleteElement]);
 	const handleExport = async () => {
 		const groups = utils_export.findGroups(elements, 50);
 		const imageRuns = [];
@@ -343,13 +359,17 @@ const Board = observer(() => {
 			x: containerRect.left + pointerPosition.x + 4,
 			y: containerRect.top + pointerPosition.y + 4
 		});
+		const targetId = e.target.hasName('selectable')
+			? e.target.id()
+			: e.target.getParent().id();
 
 		setShowMenu(true);
-		setSelectedId(e.target.id());
+		setSelectedId(targetId);
 		e.cancelBubble = true;
 	};
 	const handleMouseDown = (e) => {
 		if (!selectedTool || e.target !== e.target.getStage()) return;
+		if (isSpacePressed) return;
 
 		const stage = e.target.getStage();
 		const pos = stage.getRelativePointerPosition();
@@ -445,7 +465,7 @@ const Board = observer(() => {
 		}
 		setDrawing(false);
 		setTempElement(null);
-		setSelectedTool("");
+		// setSelectedTool("");
 	};
 	const handleWheel = (e) => {
 		e.evt.preventDefault();
@@ -509,7 +529,7 @@ const Board = observer(() => {
 				onClick={handleStageClick}
 				ref={stageRef}
 				style={{
-					cursor: selectedTool ? 'crosshair' : isSpacePressed ? 'grab' : 'default'
+					cursor: isSpacePressed ? 'grab' : selectedTool ? 'crosshair' : 'default'
 				}}
 				onMouseDown={handleMouseDown}
 				onMouseMove={handleMouseMove}
@@ -575,35 +595,14 @@ const Board = observer(() => {
 			</Stage>
 			{/* Context Menu */}
 			{showMenu && (
-				<div
-					style={{
-						position: 'fixed',
-						top: menuPosition.y,
-						left: menuPosition.x,
-						width: '60px',
-						backgroundColor: 'white',
-						boxShadow: '0 0 5px grey',
-						borderRadius: '3px',
-						zIndex: 10
-					}}
-					onClick={(e) => e.stopPropagation()}
-				>
-					<button
-						style={{
-							width: '100%',
-							backgroundColor: 'white',
-							border: 'none',
-							margin: 0,
-							padding: '10px',
-							cursor: 'pointer'
-						}}
-						onMouseOver={(e) => e.target.style.backgroundColor = 'lightgray'}
-						onMouseOut={(e) => e.target.style.backgroundColor = 'white'}
-						onClick={handleDelete}
-					>
-						Delete
-					</button>
-				</div>
+				<ContextMenu
+					position={menuPosition}
+					selectedColor={selectedColor}
+					setSelectedColor={setSelectedColor}
+					onColorChange={handleColorChange}
+					onDelete={handleDelete}
+					onClose={() => setShowMenu(false)}
+				/>
 			)}
 		</div>
 	);

@@ -116,6 +116,7 @@ const EditableText = ({
         <>
             <Text
                 draggable
+                fill={element.fill}
                 onDragStart={onDragStart}
                 onDragEnd={onDragEnd}
                 id={element.id}

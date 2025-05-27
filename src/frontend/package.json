@@ -10,10 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/react-color": "^3.0.13",
     "docx": "^9.5.0",
     "mobx": "^6.13.7",
     "mobx-react": "^9.2.0",
     "react": "^19.0.0",
+    "react-color": "^2.19.3",
     "react-dom": "^19.0.0",
     "react-konva": "^19.0.3",
     "react-konva-utils": "^1.1.0",

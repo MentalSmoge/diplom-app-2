@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import { Stage, Layer, Circle, Arrow, Text, Group } from "react-konva";
 const degrees_to_radians = degrees => degrees * (Math.PI / 180);
 import { observer } from "mobx-react-lite";
-const Edge = ({ nodeStart, nodeEnd }) => {
+const Edge = ({ nodeStart, nodeEnd, element }) => {
     const dx = nodeEnd.x - nodeStart.x;
     const dy = nodeEnd.y - nodeStart.y;
     let angle = Math.atan2(-dy, dx);
@@ -37,8 +37,8 @@ const Edge = ({ nodeStart, nodeEnd }) => {
                     arrowEnd.x,
                     arrowEnd.y
                 ]}
-                stroke="#000"
-                fill="#000"
+                fill={element.fill}
+                stroke={element.fill}
                 strokeWidth={2}
                 pointerWidth={6}
             />
@@ -105,6 +105,7 @@ const EdgeArrow = observer
         return (
             <Group
                 id={element.id}
+                name="selectable"
                 ref={node => {
                     if (node) {
                         rectRefs.current.set(element.id, node);
@@ -112,7 +113,7 @@ const EdgeArrow = observer
                     }
                 }}
             >
-                <Edge nodeEnd={nodeEnd} nodeStart={nodeStart} />
+                <Edge nodeEnd={nodeEnd} nodeStart={nodeStart} element={element} />
                 <Circle
                     {...nodeStart}
                     onDragMove={e => {
