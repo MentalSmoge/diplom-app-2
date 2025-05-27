@@ -11,9 +11,9 @@ import Boards from "./pages/boards";
 function App() {
   return (
     <Router >
-      <div className="App" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%' }}>
+      <div className="App" style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw' }}>
         <Header />
-        <main style={{ flex: 1 }}>
+        <main style={{ flex: 1, overflow: 'hidden' }} >
           <Routes>
             <Route path="/" element={<Navigate to="/projects" />} />
             <Route path="/user" element={<Users />} />

@@ -13,6 +13,7 @@ import "./Toolbar.css"
 
 const Board = observer(() => {
 	const { boardId } = useParams(); // Получаем ID доски из URL
+	const [isSpacePressed, setIsSpacePressed] = useState(false);
 	const [selectedTool, setSelectedTool] = useState(null);
 	const [tempElement, setTempElement] = useState(null);
 	const [drawing, setDrawing] = useState(false);
@@ -85,6 +86,27 @@ const Board = observer(() => {
 		const handleWindowClick = () => setShowMenu(false);
 		window.addEventListener('click', handleWindowClick);
 		return () => window.removeEventListener('click', handleWindowClick);
+	}, []);
+	useEffect(() => {
+		const handleKeyDown = (e) => {
+			if (e.code === 'Space') {
+				setIsSpacePressed(true);
+			}
+		};
+
+		const handleKeyUp = (e) => {
+			if (e.code === 'Space') {
+				setIsSpacePressed(false);
+			}
+		};
+
+		window.addEventListener('keydown', handleKeyDown);
+		window.addEventListener('keyup', handleKeyUp);
+
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown);
+			window.removeEventListener('keyup', handleKeyUp);
+		};
 	}, []);
 
 	const handleCreateElement = (element) => {
@@ -458,7 +480,7 @@ const Board = observer(() => {
 		stage.position(newPos);
 	};
 	return (
-		<div>
+		<div >
 			<div className="toolbar">
 				<button
 					onClick={() => setSelectedTool('arrow')}
@@ -483,10 +505,12 @@ const Board = observer(() => {
 			<Stage
 				width={window.innerWidth}
 				height={window.innerHeight}
-				draggable={true}
+				draggable={isSpacePressed}
 				onClick={handleStageClick}
 				ref={stageRef}
-				style={{ cursor: selectedTool ? 'crosshair' : 'default' }}
+				style={{
+					cursor: selectedTool ? 'crosshair' : isSpacePressed ? 'grab' : 'default'
+				}}
 				onMouseDown={handleMouseDown}
 				onMouseMove={handleMouseMove}
 				onMouseUp={handleMouseUp}
