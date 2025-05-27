@@ -86,99 +86,6 @@ const Board = observer(() => {
 		window.addEventListener('click', handleWindowClick);
 		return () => window.removeEventListener('click', handleWindowClick);
 	}, []);
-	// useEffect(() => {
-	// 	// if (effectRan.current === true) { return }
-	// 	console.log("Connecting")
-	// 	console.log(isConnected)
-	// 	// const handleWindowClick = () => {
-	// 	// 	setShowMenu(false);
-	// 	// };
-	// 	// window.addEventListener('click', handleWindowClick);
-	// 	const onConnect = () => {
-	// 		setIsConnected(true);
-	// 		socket.emit("join-board", boardId);
-	// 		console.log("emitting")
-	// 	};
-	// 	const onDisconnect = () => {
-	// 		console.log("disconnecting")
-	// 		setIsConnected(false);
-	// 	};
-	// 	socket.on("connect", onConnect);
-	// 	socket.on("disconnect", onDisconnect);
-	// 	// if (!isConnected) {
-	// 	// 	console.log("wait im not connected", socket)
-	// 	// 	socket.connect();
-	// 	// }
-	// 	if (socket.disconnected) {
-	// 		socket.connect();
-	// 		console.log("wait im not connected", socket)
-	// 	}
-	// 	const handleBoardState = (serverElements) => {
-	// 		console.log("board stating", serverElements)
-	// 		setElements(serverElements);
-	// 	};
-
-	// 	const handleElementCreated = (element) => {
-	// 		console.log("handleElementCreated")
-	// 		setElements((prev) => [...prev, element]);
-	// 	};
-
-	// 	const handleElementUpdated = (element) => {
-	// 		console.log("Изменился")
-	// 		setElements((prev) =>
-	// 			prev.map((el) => (el.id === element.id ? element : el))
-	// 		);
-	// 	};
-
-	// 	const handleElementDeleted = (elementId) => {
-	// 		setElements((prev) => prev.filter((el) => el.id !== elementId));
-	// 	};
-
-	// 	socket.on("board-state", handleBoardState);
-	// 	socket.on("element-created", handleElementCreated);
-	// 	socket.on("element-updated", handleElementUpdated);
-	// 	socket.on("element-deleted", handleElementDeleted);
-	// 	if (selectedIds.length && transformerRef.current) {
-	// 		// Get the nodes from the refs Map
-	// 		const nodes = selectedIds
-	// 			.map(id => rectRefs.current.get(id))
-	// 			.filter(node => node);
-	// 		// console.log(elements)
-	// 		transformerRef.current.nodes(nodes);
-	// 	} else if (transformerRef.current) {
-	// 		// Clear selection
-	// 		transformerRef.current.nodes([]);
-	// 	}
-	// 	// connectToBoard()
-	// 	// Проверяем аутентификацию при загрузке компонента
-	// 	const getAccessLevel = async () => {
-	// 		const isAuthenticated = await checkBoardAccess(numberBoardId);
-	// 		if (isAuthenticated === null) {
-	// 			navigate('/login');
-	// 			return;
-	// 		}
-	// 		if (isAuthenticated.data === 0) {
-	// 			navigate('/login');
-	// 			return;
-	// 		}
-	// 		console.log("all good, connecting", isAuthenticated.data)
-	// 		// connectToBoard(isAuthenticated.data)
-	// 	};
-	// 	getAccessLevel();
-	// 	return () => {
-	// 		effectRan.current = true;
-	// 		console.log("Disconnecting socket...");
-	// 		socket.off("connect", onConnect);
-	// 		socket.off("disconnect", onDisconnect);
-	// 		socket.off("board-state", handleBoardState);
-	// 		socket.off("element-created", handleElementCreated);
-	// 		socket.off("element-updated", handleElementUpdated);
-	// 		socket.off("element-deleted", handleElementDeleted);
-	// 		socket.emit("leave-board", numberBoardId);
-	// 		window.removeEventListener('click', handleWindowClick);
-	// 		socket.disconnect(); // Отключаем сокет
-	// 	};
-	// }, [boardId, navigate, selectedIds]);
 
 	const handleCreateElement = (element) => {
 		console.log(isConnected)
@@ -192,58 +99,6 @@ const Board = observer(() => {
 
 	const handleDeleteElement = (elementId) => {
 		socket.emit("element-delete", { boardId, elementId });
-	};
-
-	const addRectangle = () => {
-		const newElement = {
-			id: Date.now().toString(),
-			boardId: numberBoardId,
-			type: "rect",
-			x: 100,
-			y: 100,
-			width: 100,
-			height: 100,
-			fill: "red",
-			isDragging: false,
-			onDragStart: handleDragStart,
-			onDragEnd: handleDragEnd,
-		};
-		handleCreateElement(newElement);
-	};
-	const addText = () => {
-		const newElement = {
-			id: Date.now().toString(),
-			boardId: numberBoardId,
-			type: "text",
-			text: "Enter text...",
-			x: 100,
-			y: 100,
-			width: 100,
-			height: 100,
-			isDragging: false,
-			onDragStart: handleDragStart,
-			onDragEnd: handleDragEnd,
-		};
-		handleCreateElement(newElement);
-	};
-	const addArrow = () => {
-		const newElement = {
-			id: Date.now().toString(),
-			boardId: numberBoardId,
-			type: "arrow",
-			x_start: 100,
-			y_start: 100,
-			x_end: 200,
-			y_end: 200,
-			isDragging: false,
-			onDragStart: handleDragStart,
-			onDragEnd: handleDragEnd,
-		};
-		handleCreateElement(newElement);
-	};
-
-	const deleteRectangle = (elementId) => {
-		if (elementId) handleDeleteElement(elementId);
 	};
 
 	const handleDragStart = (e) => {
@@ -625,16 +480,6 @@ const Board = observer(() => {
 				</button>
 				<button onClick={handleExport}>📤 Export</button>
 			</div>
-			{/* <div>Current Board: {boardId}</div> */}
-			{/* <button onClick={addArrow}>Add Arrow</button>
-			<button onClick={addText}>Add Text</button>
-			<button onClick={addRectangle}>Add Rectangle</button>
-			<button onClick={() => deleteRectangle(elements[0]?.id)}>
-				Delete Rectangle
-			</button>
-			<button onClick={handleExport} style={{ marginBottom: '10px' }}>
-				Export to document
-			</button> */}
 			<Stage
 				width={window.innerWidth}
 				height={window.innerHeight}
