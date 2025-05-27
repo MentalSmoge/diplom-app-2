@@ -8,7 +8,7 @@ export function Logout() {
     useEffect(() => {
         const performLogout = async () => {
             try {
-                await fetch('http://45.143.92.185:8080/logout', {
+                await fetch('http://localhost:8080/logout', {
                     method: 'POST',
                     credentials: 'include',
                 });

@@ -2,7 +2,7 @@ import * as r from "rethinkdb";
 import { ElementRepository, Element } from "../domain/element";
 
 const rethinkConfig = {
-    host: process.env.RETHINKDB_HOST || "45.143.92.185",
+    host: process.env.RETHINKDB_HOST || "localhost",
     port: process.env.RETHINKDB_PORT ? Number(process.env.RETHINKDB_PORT) : 28015,
     db: process.env.RETHINKDB_NAME || "rethink",
     table: "elements",

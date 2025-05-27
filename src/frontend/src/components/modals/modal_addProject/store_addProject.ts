@@ -12,7 +12,7 @@ class AddProjectModalStore {
   }
 
   async addProject(userId: unknown) {
-    const response = await fetch('http://45.143.92.185:8080/projects', {
+    const response = await fetch('http://localhost:8080/projects', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

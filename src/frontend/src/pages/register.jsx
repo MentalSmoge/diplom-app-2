@@ -22,7 +22,7 @@ export const Register = () => {
         setError('');
 
         try {
-            const response = await fetch('http://45.143.92.185:8080/registration', {
+            const response = await fetch('http://localhost:8080/registration', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, password }),

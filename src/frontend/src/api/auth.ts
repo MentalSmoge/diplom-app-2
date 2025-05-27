@@ -1,6 +1,6 @@
 export const checkAuth = async () => {
     try {
-        const response = await fetch('http://45.143.92.185:8080/check-auth', {
+        const response = await fetch('http://localhost:8080/check-auth', {
             credentials: 'include',
         });
 
@@ -17,7 +17,7 @@ export const checkAuth = async () => {
 
 export const checkBoardAccess = async (boardId: number) => {
     try {
-        const response = await fetch(`http://45.143.92.185:8080/check-board-access/${boardId}`, {
+        const response = await fetch(`http://localhost:8080/check-board-access/${boardId}`, {
             credentials: 'include',
         });
 
@@ -34,7 +34,7 @@ export const checkBoardAccess = async (boardId: number) => {
 
 export const logout = async () => {
     try {
-        await fetch('http://45.143.92.185:8080/logout', {
+        await fetch('http://localhost:8080/logout', {
             method: 'POST',
             credentials: 'include',
         });

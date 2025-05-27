@@ -9,13 +9,20 @@ import EdgeArrow from "../components/board_components/arrow";
 import { observer } from "mobx-react";
 import { Document, Paragraph, ImageRun, Packer, HeadingLevel } from "docx";
 import * as utils_export from "../utils/utils_export"
-
+import "./Toolbar.css"
 
 const Board = observer(() => {
 	const { boardId } = useParams(); // Получаем ID доски из URL
+	const [selectedTool, setSelectedTool] = useState(null);
+	const [tempElement, setTempElement] = useState(null);
+	const [drawing, setDrawing] = useState(false);
+	const [startPos, setStartPos] = useState({ x: 0, y: 0 });
 	const [numberBoardId, setNumberBoardId] = useState(Number(boardId))
 	const [elements, setElements] = useState([]);
 	const [selectedIds, setSelectedIds] = useState([]);
+	const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+	const [showMenu, setShowMenu] = useState(false);
+	const [selectedId, setSelectedId] = useState(null);
 	const [selectionRectangle, setSelectionRectangle] = useState({
 		visible: false,
 		x1: 0,
@@ -26,105 +33,152 @@ const Board = observer(() => {
 	const transformerRef = useRef();
 	const rectRefs = useRef(new Map());
 	const [isConnected, setIsConnected] = useState(false);
-	const [loading, setLoading] = useState(true);
 	const navigate = useNavigate();
-	const connectToBoard = () => {
 
-
-		return () => {
-			// Отписываемся от всех событий при размонтировании
-		};
-	}
-
-	const effectRan = useRef(false)
 	useEffect(() => {
-		// if (effectRan.current === true) { return }
-		console.log("Connecting")
-		console.log(isConnected)
-		const onConnect = () => {
-			setIsConnected(true);
-			socket.emit("join-board", boardId);
-			console.log("emitting")
-		};
-		const onDisconnect = () => {
-			console.log("disconnecting")
-			setIsConnected(false);
-		};
-		socket.on("connect", onConnect);
-		socket.on("disconnect", onDisconnect);
-		// if (!isConnected) {
-		// 	console.log("wait im not connected", socket)
-		// 	socket.connect();
-		// }
-		if (socket.disconnected) {
-			socket.connect();
-			console.log("wait im not connected", socket)
-		}
-		const handleBoardState = (serverElements) => {
-			console.log("board stating", serverElements)
-			setElements(serverElements);
-		};
-
-		const handleElementCreated = (element) => {
-			console.log("handleElementCreated")
-			setElements((prev) => [...prev, element]);
-		};
-
-		const handleElementUpdated = (element) => {
-			console.log("Изменился")
-			setElements((prev) =>
-				prev.map((el) => (el.id === element.id ? element : el))
-			);
-		};
-
-		const handleElementDeleted = (elementId) => {
-			setElements((prev) => prev.filter((el) => el.id !== elementId));
-		};
+		const handleBoardState = (serverElements) => setElements(serverElements);
+		const handleElementCreated = (element) => setElements(prev => [...prev, element]);
+		const handleElementUpdated = (element) => setElements(prev => prev.map(el => el.id === element.id ? element : el));
+		const handleElementDeleted = (elementId) => setElements(prev => prev.filter(el => el.id !== elementId));
 
 		socket.on("board-state", handleBoardState);
 		socket.on("element-created", handleElementCreated);
 		socket.on("element-updated", handleElementUpdated);
 		socket.on("element-deleted", handleElementDeleted);
-		if (selectedIds.length && transformerRef.current) {
-			// Get the nodes from the refs Map
-			const nodes = selectedIds
-				.map(id => rectRefs.current.get(id))
-				.filter(node => node);
-			// console.log(elements)
-			transformerRef.current.nodes(nodes);
-		} else if (transformerRef.current) {
-			// Clear selection
-			transformerRef.current.nodes([]);
-		}
-		// connectToBoard()
-		// Проверяем аутентификацию при загрузке компонента
-		const getAccessLevel = async () => {
-			const isAuthenticated = await checkBoardAccess(numberBoardId);
-			if (isAuthenticated === null) {
-				navigate('/login');
-				return;
-			}
-			if (isAuthenticated.data === 0) {
-				navigate('/login');
-				return;
-			}
-			console.log("all good, connecting", isAuthenticated.data)
-			// connectToBoard(isAuthenticated.data)
-		};
-		getAccessLevel();
+
 		return () => {
-			effectRan.current = true;
-			console.log("Disconnecting socket...");
-			socket.off("connect", onConnect);
-			socket.off("disconnect", onDisconnect);
 			socket.off("board-state", handleBoardState);
 			socket.off("element-created", handleElementCreated);
 			socket.off("element-updated", handleElementUpdated);
 			socket.off("element-deleted", handleElementDeleted);
-			socket.emit("leave-board", numberBoardId);
-			socket.disconnect(); // Отключаем сокет
 		};
-	}, [boardId, navigate, selectedIds]);
+	}, []);
+	useEffect(() => {
+		const onConnect = () => {
+			setIsConnected(true);
+			socket.emit("join-board", boardId);
+		};
+		socket.on("connect", onConnect);
+		const getAccessLevel = async () => {
+			const isAuthenticated = await checkBoardAccess(numberBoardId);
+			if (!isAuthenticated?.data) navigate('/login');
+		};
+
+		getAccessLevel();
+		socket.connect();
+
+		return () => {
+			socket.emit("leave-board", numberBoardId);
+			socket.disconnect();
+		};
+	}, [navigate, numberBoardId]); // Зависимости только от параметров маршрута
+	useEffect(() => {
+		if (!transformerRef.current) return;
+
+		const nodes = selectedIds
+			.map(id => rectRefs.current.get(id))
+			.filter(node => node);
+
+		transformerRef.current.nodes(nodes);
+	}, [selectedIds]); // Срабатывает только при изменении selectedIds
+	useEffect(() => {
+		const handleWindowClick = () => setShowMenu(false);
+		window.addEventListener('click', handleWindowClick);
+		return () => window.removeEventListener('click', handleWindowClick);
+	}, []);
+	// useEffect(() => {
+	// 	// if (effectRan.current === true) { return }
+	// 	console.log("Connecting")
+	// 	console.log(isConnected)
+	// 	// const handleWindowClick = () => {
+	// 	// 	setShowMenu(false);
+	// 	// };
+	// 	// window.addEventListener('click', handleWindowClick);
+	// 	const onConnect = () => {
+	// 		setIsConnected(true);
+	// 		socket.emit("join-board", boardId);
+	// 		console.log("emitting")
+	// 	};
+	// 	const onDisconnect = () => {
+	// 		console.log("disconnecting")
+	// 		setIsConnected(false);
+	// 	};
+	// 	socket.on("connect", onConnect);
+	// 	socket.on("disconnect", onDisconnect);
+	// 	// if (!isConnected) {
+	// 	// 	console.log("wait im not connected", socket)
+	// 	// 	socket.connect();
+	// 	// }
+	// 	if (socket.disconnected) {
+	// 		socket.connect();
+	// 		console.log("wait im not connected", socket)
+	// 	}
+	// 	const handleBoardState = (serverElements) => {
+	// 		console.log("board stating", serverElements)
+	// 		setElements(serverElements);
+	// 	};
+
+	// 	const handleElementCreated = (element) => {
+	// 		console.log("handleElementCreated")
+	// 		setElements((prev) => [...prev, element]);
+	// 	};
+
+	// 	const handleElementUpdated = (element) => {
+	// 		console.log("Изменился")
+	// 		setElements((prev) =>
+	// 			prev.map((el) => (el.id === element.id ? element : el))
+	// 		);
+	// 	};
+
+	// 	const handleElementDeleted = (elementId) => {
+	// 		setElements((prev) => prev.filter((el) => el.id !== elementId));
+	// 	};
+
+	// 	socket.on("board-state", handleBoardState);
+	// 	socket.on("element-created", handleElementCreated);
+	// 	socket.on("element-updated", handleElementUpdated);
+	// 	socket.on("element-deleted", handleElementDeleted);
+	// 	if (selectedIds.length && transformerRef.current) {
+	// 		// Get the nodes from the refs Map
+	// 		const nodes = selectedIds
+	// 			.map(id => rectRefs.current.get(id))
+	// 			.filter(node => node);
+	// 		// console.log(elements)
+	// 		transformerRef.current.nodes(nodes);
+	// 	} else if (transformerRef.current) {
+	// 		// Clear selection
+	// 		transformerRef.current.nodes([]);
+	// 	}
+	// 	// connectToBoard()
+	// 	// Проверяем аутентификацию при загрузке компонента
+	// 	const getAccessLevel = async () => {
+	// 		const isAuthenticated = await checkBoardAccess(numberBoardId);
+	// 		if (isAuthenticated === null) {
+	// 			navigate('/login');
+	// 			return;
+	// 		}
+	// 		if (isAuthenticated.data === 0) {
+	// 			navigate('/login');
+	// 			return;
+	// 		}
+	// 		console.log("all good, connecting", isAuthenticated.data)
+	// 		// connectToBoard(isAuthenticated.data)
+	// 	};
+	// 	getAccessLevel();
+	// 	return () => {
+	// 		effectRan.current = true;
+	// 		console.log("Disconnecting socket...");
+	// 		socket.off("connect", onConnect);
+	// 		socket.off("disconnect", onDisconnect);
+	// 		socket.off("board-state", handleBoardState);
+	// 		socket.off("element-created", handleElementCreated);
+	// 		socket.off("element-updated", handleElementUpdated);
+	// 		socket.off("element-deleted", handleElementDeleted);
+	// 		socket.emit("leave-board", numberBoardId);
+	// 		window.removeEventListener('click', handleWindowClick);
+	// 		socket.disconnect(); // Отключаем сокет
+	// 	};
+	// }, [boardId, navigate, selectedIds]);
 
 	const handleCreateElement = (element) => {
 		console.log(isConnected)
@@ -339,6 +393,12 @@ const Board = observer(() => {
 	};
 	const stageRef = useRef(null);
 
+	const handleDelete = () => {
+		if (selectedId) handleDeleteElement(selectedId);
+		setShowMenu(false);
+
+		setSelectedIds([]);
+	};
 	const handleExport = async () => {
 		const groups = utils_export.findGroups(elements, 50);
 		const imageRuns = [];
@@ -392,11 +452,181 @@ const Board = observer(() => {
 		document.body.removeChild(link);
 		URL.revokeObjectURL(url);
 	};
+	const handleContextMenu = (e) => {
+		e.evt.preventDefault();
+		if (e.target === e.target.getStage()) {
+			return;
+		}
 
+		const stage = e.target.getStage();
+		const containerRect = stage.container().getBoundingClientRect();
+		const pointerPosition = stage.getPointerPosition();
+
+		setMenuPosition({
+			x: containerRect.left + pointerPosition.x + 4,
+			y: containerRect.top + pointerPosition.y + 4
+		});
+
+		setShowMenu(true);
+		setSelectedId(e.target.id());
+		e.cancelBubble = true;
+	};
+	const handleMouseDown = (e) => {
+		if (!selectedTool || e.target !== e.target.getStage()) return;
+
+		const stage = e.target.getStage();
+		const pos = stage.getRelativePointerPosition();
+		setStartPos(pos);
+		setDrawing(true);
+
+		// Для текста создаем элемент сразу
+		if (selectedTool === 'text') {
+			const newElement = {
+				id: Date.now().toString(),
+				boardId: numberBoardId,
+				type: 'text',
+				x: pos.x,
+				y: pos.y,
+				text: 'New Text',
+				width: 100,
+				height: 40,
+				isDragging: false,
+				onDragStart: handleDragStart,
+				onDragEnd: handleDragEnd,
+			};
+			handleCreateElement(newElement);
+			setSelectedTool(null);
+			return;
+		}
+		if (selectedTool === 'arrow') {
+			setTempElement({
+				id: Date.now().toString(),
+				type: 'arrow',
+				boardId: numberBoardId,
+				x_start: pos.x,
+				y_start: pos.y,
+				x_end: pos.x,
+				y_end: pos.y,
+				isDragging: false,
+				onDragStart: handleDragStart,
+				onDragEnd: handleDragEnd,
+			});
+			return;
+		}
+
+		// Для других элементов создаем временный
+		setTempElement({
+			type: selectedTool,
+			boardId: numberBoardId,
+			x: pos.x,
+			y: pos.y,
+			width: 0,
+			height: 0,
+			isDragging: false,
+			onDragStart: handleDragStart,
+			onDragEnd: handleDragEnd,
+			fill: '#e55039', // Цвет по умолчанию
+			stroke: '#2d3436',
+		});
+	};
+	const handleMouseMove = (e) => {
+		if (!drawing || !tempElement) return;
+
+		const stage = e.target.getStage();
+		const pos = stage.getRelativePointerPosition();
+		const newWidth = pos.x - startPos.x;
+		const newHeight = pos.y - startPos.y;
+
+		if (tempElement.type === 'arrow') {
+			setTempElement({
+				...tempElement,
+				x_end: pos.x,
+				y_end: pos.y,
+				width: newWidth,
+				height: newHeight,
+			});
+		} else {
+			setTempElement({
+				...tempElement,
+				width: pos.x - tempElement.x,
+				height: pos.y - tempElement.y,
+			});
+		}
+	};
+	const handleMouseUp = () => {
+		if (!drawing || !tempElement) return;
+		console.log(tempElement)
+
+		if (Math.abs(tempElement.width) > 5 && Math.abs(tempElement.height) > 5) {
+			const newElement = {
+				...tempElement,
+				id: Date.now().toString(), // Генерируем новый ID
+				isDragging: false,
+			};
+			handleCreateElement(newElement);
+
+		}
+		setDrawing(false);
+		setTempElement(null);
+		setSelectedTool("");
+	};
+	const handleWheel = (e) => {
+		e.evt.preventDefault();
+
+		const stage = stageRef.current;
+		const oldScale = stage.scaleX();
+		const pointer = stage.getPointerPosition();
+
+		const mousePointTo = {
+			x: (pointer.x - stage.x()) / oldScale,
+			y: (pointer.y - stage.y()) / oldScale,
+		};
+
+		// how to scale? Zoom in? Or zoom out?
+		let direction = e.evt.deltaY > 0 ? -1 : 1;
+
+		// when we zoom on trackpad, e.evt.ctrlKey is true
+		// in that case lets revert direction
+		if (e.evt.ctrlKey) {
+			direction = -direction;
+		}
+
+		const scaleBy = 1.25;
+		const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+
+		stage.scale({ x: newScale, y: newScale });
+
+		const newPos = {
+			x: pointer.x - mousePointTo.x * newScale,
+			y: pointer.y - mousePointTo.y * newScale,
+		};
+		stage.position(newPos);
+	};
 	return (
 		<div>
+			<div className="toolbar">
+				<button
+					onClick={() => setSelectedTool('arrow')}
+					style={{ background: selectedTool === 'arrow' ? '#ddd' : '#fff' }}
+				>
+					🢂 Arrow
+				</button>
+				<button
+					onClick={() => setSelectedTool('text')}
+					style={{ background: selectedTool === 'text' ? '#ddd' : '#fff' }}
+				>
+					T Text
+				</button>
+				<button
+					onClick={() => setSelectedTool('rect')}
+					style={{ background: selectedTool === 'rect' ? '#ddd' : '#fff' }}
+				>
+					▭ Rectangle
+				</button>
+				<button onClick={handleExport}>📤 Export</button>
+			</div>
 			{/* <div>Current Board: {boardId}</div> */}
-			<button onClick={addArrow}>Add Arrow</button>
+			{/* <button onClick={addArrow}>Add Arrow</button>
 			<button onClick={addText}>Add Text</button>
 			<button onClick={addRectangle}>Add Rectangle</button>
 			<button onClick={() => deleteRectangle(elements[0]?.id)}>
@@ -404,9 +634,20 @@ const Board = observer(() => {
 			</button>
 			<button onClick={handleExport} style={{ marginBottom: '10px' }}>
 				Export to document
-			</button>
-			<Stage width={window.innerWidth} height={window.innerHeight} draggable={true}
-				onClick={handleStageClick} ref={stageRef}>
+			</button> */}
+			<Stage
+				width={window.innerWidth}
+				height={window.innerHeight}
+				draggable={true}
+				onClick={handleStageClick}
+				ref={stageRef}
+				style={{ cursor: selectedTool ? 'crosshair' : 'default' }}
+				onMouseDown={handleMouseDown}
+				onMouseMove={handleMouseMove}
+				onMouseUp={handleMouseUp}
+				onContextMenu={handleContextMenu}
+				onWheel={handleWheel}
+			>
 				<Layer>
 					{elements.map((element) =>
 						element.type === "text" ? (
@@ -415,6 +656,33 @@ const Board = observer(() => {
 							<RectangleElement key={element.id} element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} />
 						) : element.type === "arrow" ? (
 							<EdgeArrow key={element.id} element={element} onDragEnd={handleDragEndArrow} onDragStart={handleDragStart} rectRefs={rectRefs} />
+						) : null
+					)}
+					{drawing && tempElement && (
+						tempElement.type === 'rect' ? (
+							<Rect
+								x={tempElement.x}
+								y={tempElement.y}
+								width={tempElement.width}
+								height={tempElement.height}
+								fill={tempElement.fill}
+								stroke={tempElement.stroke}
+								strokeWidth={2}
+							/>
+						) : tempElement.type === 'arrow' ? (
+							<EdgeArrow
+								element={{
+									...tempElement,
+									x_start: tempElement.x_start,
+									y_start: tempElement.y_start,
+									x_end: tempElement.x_end,
+									y_end: tempElement.y_end,
+								}}
+								onDragEnd={() => { }}
+								onDragStart={() => { }}
+								rectRefs={{ current: new Map() }}
+								onUpdateElement={() => { }}
+							/>
 						) : null
 					)}
 					<Transformer
@@ -436,6 +704,38 @@ const Board = observer(() => {
 					/>
 				</Layer>
 			</Stage>
+			{/* Context Menu */}
+			{showMenu && (
+				<div
+					style={{
+						position: 'fixed',
+						top: menuPosition.y,
+						left: menuPosition.x,
+						width: '60px',
+						backgroundColor: 'white',
+						boxShadow: '0 0 5px grey',
+						borderRadius: '3px',
+						zIndex: 10
+					}}
+					onClick={(e) => e.stopPropagation()}
+				>
+					<button
+						style={{
+							width: '100%',
+							backgroundColor: 'white',
+							border: 'none',
+							margin: 0,
+							padding: '10px',
+							cursor: 'pointer'
+						}}
+						onMouseOver={(e) => e.target.style.backgroundColor = 'lightgray'}
+						onMouseOut={(e) => e.target.style.backgroundColor = 'white'}
+						onClick={handleDelete}
+					>
+						Delete
+					</button>
+				</div>
+			)}
 		</div>
 	);
 })

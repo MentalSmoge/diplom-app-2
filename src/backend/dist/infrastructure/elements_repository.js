@@ -36,7 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RethinkDBElementRepository = void 0;
 const r = __importStar(require("rethinkdb"));
 const rethinkConfig = {
-    host: process.env.RETHINKDB_HOST || "45.143.92.185",
+    host: process.env.RETHINKDB_HOST || "localhost",
     port: process.env.RETHINKDB_PORT ? Number(process.env.RETHINKDB_PORT) : 28015,
     db: process.env.RETHINKDB_NAME || "rethink",
     table: "elements",

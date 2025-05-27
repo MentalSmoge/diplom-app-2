@@ -11,7 +11,7 @@ class AddBoardModalStore {
   }
 
   async addBoard(userId: unknown, projectId: unknown) {
-    const response = await fetch('http://45.143.92.185:8080/boards', {
+    const response = await fetch('http://localhost:8080/boards', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
