@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { Stage, Layer, Text, Rect, Transformer } from "react-konva";
+import { Stage, Layer, Image, Rect, Transformer } from "react-konva";
 import { socket } from "../socket";
 import { useParams, useNavigate } from "react-router-dom";
 import { checkBoardAccess } from "../api/auth";
@@ -10,7 +10,9 @@ import { observer } from "mobx-react";
 import { Document, Paragraph, ImageRun, Packer, HeadingLevel } from "docx";
 import * as utils_export from "../utils/utils_export"
 import ContextMenu from '../components/contextMenu';
+import useImage from 'use-image';
 import "./Toolbar.css"
+import ImageElement from "../components/board_components/imageElement";
 
 const Board = observer(() => {
 	const { boardId } = useParams(); // Получаем ID доски из URL
@@ -36,6 +38,7 @@ const Board = observer(() => {
 	const transformerRef = useRef();
 	const rectRefs = useRef(new Map());
 	const [isConnected, setIsConnected] = useState(false);
+	const [isDraggingOver, setIsDraggingOver] = useState(false);
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -499,8 +502,68 @@ const Board = observer(() => {
 		};
 		stage.position(newPos);
 	};
+	const handleDragOver = useCallback((e) => {
+		e.preventDefault();
+		setIsDraggingOver(true);
+	}, []);
+
+	const handleDragLeave = useCallback((e) => {
+		e.preventDefault();
+		setIsDraggingOver(false);
+	}, []);
+
+	const handleDrop = useCallback(async (e) => {
+		e.preventDefault();
+		setIsDraggingOver(false);
+
+		const stage = stageRef.current;
+		const pos = stage.getRelativePointerPosition();
+		const files = e.dataTransfer.files;
+
+		if (files.length === 0) return;
+
+		const file = files[0];
+		if (!file.type.startsWith('image/')) return;
+		console.log(file)
+		try {
+			const formData = new FormData();
+			formData.append('image', file);
+
+			const response = await fetch('http://localhost:8080/upload', {
+				method: 'POST',
+				body: formData,
+				credentials: 'include',
+			});
+
+			if (!response.ok) throw new Error('Upload failed');
+
+			const { url } = await response.json();
+
+			const newElement = {
+				id: `img-${Date.now()}`,
+				boardId: numberBoardId,
+				type: 'image',
+				x: pos.x,
+				y: pos.y,
+				width: 200,
+				height: 150,
+				imageUrl: url,
+				isDragging: false,
+			};
+
+			handleCreateElement(newElement);
+		} catch (error) {
+			console.error('Upload error:', error);
+			alert('Failed to upload image');
+		}
+	}, [numberBoardId, handleCreateElement]);
 	return (
-		<div >
+		<div
+			onDragOver={handleDragOver}
+			onDragLeave={handleDragLeave}
+			onDrop={handleDrop}
+			style={{ position: 'relative' }}
+		>
 			<div className="toolbar">
 				<button
 					onClick={() => setSelectedTool('arrow')}
@@ -522,6 +585,18 @@ const Board = observer(() => {
 				</button>
 				<button onClick={handleExport}>📤 Export</button>
 			</div>
+			{isDraggingOver && (
+				<div style={{
+					position: 'absolute',
+					top: 0,
+					left: 0,
+					width: '100%',
+					height: '100%',
+					backgroundColor: 'rgba(0,255,0,0.2)',
+					zIndex: 1000,
+					pointerEvents: 'none'
+				}} />
+			)}
 			<Stage
 				width={window.innerWidth}
 				height={window.innerHeight}
@@ -545,7 +620,10 @@ const Board = observer(() => {
 							<RectangleElement key={element.id} element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} />
 						) : element.type === "arrow" ? (
 							<EdgeArrow key={element.id} element={element} onDragEnd={handleDragEndArrow} onDragStart={handleDragStart} rectRefs={rectRefs} />
-						) : null
+						) : element.type === "image" ? (
+							<ImageElement key={element.id} element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} />
+						) :
+							null
 					)}
 					{drawing && tempElement && (
 						tempElement.type === 'rect' ? (

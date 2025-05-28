@@ -38,8 +38,9 @@ services:
             - DB_NAME=${DB_NAME}
             - DB_PORT=5432
         volumes:
-            - ./backend:/app_backend
-            - /app_backend/node_modules
+            - images_volume:/app_backend/public/images
+            # - ./backend:/app_backend
+            # - /app_backend/node_modules
         networks:
             - app-network
     user_db:
@@ -59,6 +60,7 @@ services:
 
 volumes:
     postgres-data:
+    images_volume:
 networks:
     app-network:
         driver: bridge

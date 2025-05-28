@@ -24,6 +24,8 @@ import { createProjectRouter } from "./framework/projects_routes";
 import { PostgreSQLElementRepository } from "./infrastructure/elements_repository_postgre";
 import { PostgreSQLProjectRepository } from "./infrastructure/projects_repository";
 import { ProjectService } from "./application/project_service";
+import { createImageRouter } from './framework/image_routes';
+import path from "path";
 
 const port = process.env.USERS_PORT || 8080;
 const app = express();
@@ -68,6 +70,12 @@ async function startUsersServer() {
     app.use("/", createAuthRouter(userService, authService, boardService));
     app.use("/", createBoardRouter(boardService));
     app.use("/", createProjectRouter(projectService));
+    app.use('/', createImageRouter());
+    app.use('/images', express.static(path.join(__dirname, '../public/images'), {
+        setHeaders: (res) => {
+            res.set('Access-Control-Allow-Origin', '*');
+        }
+    }));
 
 
 

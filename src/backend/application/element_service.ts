@@ -7,7 +7,7 @@ export class ElementService {
     async initialize(): Promise<void> {
         await this.elementRepository.initialize();
         this.elements = await this.elementRepository.loadInitialState();
-        console.log(this.elements, "THIS ELEMENTS")
+        // console.log(this.elements, "THIS ELEMENTS")
     }
 
     getElements(): Element[] {
@@ -15,8 +15,8 @@ export class ElementService {
     }
     async getElementsByBoard(boardId: string): Promise<Element[]> {
         const existingElements = this.elements.filter((el) => el.boardId === Number(boardId));
-        console.log(this.elements)
-        console.log(existingElements, "THIS EXISTING ELEMENTS")
+        // console.log(this.elements)
+        // console.log(existingElements, "THIS EXISTING ELEMENTS")
         return existingElements;
     }
 
