@@ -522,10 +522,13 @@ const Board = observer(() => {
 
 	const handleDrop = useCallback(async (e) => {
 		e.preventDefault();
+		console.log("Dropping")
 		setIsDraggingOver(false);
 
 		const stage = stageRef.current;
-		const pos = stage.getRelativePointerPosition();
+		stage.setPointersPositions(e);
+		const pos = stage.getPointerPosition();
+		console.log("pos", pos)
 		const files = e.dataTransfer.files;
 
 		if (files.length === 0) return;
@@ -545,7 +548,19 @@ const Board = observer(() => {
 
 			if (!response.ok) throw new Error('Upload failed');
 
-			const { url } = await response.json();
+			const { url, width, height } = await response.json();
+			const maxDimension = 500; // Максимальный размер по любой из сторон
+			let scaledWidth = width;
+			let scaledHeight = height;
+			if (width > height && width > maxDimension) {
+				const scale = maxDimension / width;
+				scaledWidth = maxDimension;
+				scaledHeight = Math.round(height * scale);
+			} else if (height > maxDimension) {
+				const scale = maxDimension / height;
+				scaledHeight = maxDimension;
+				scaledWidth = Math.round(width * scale);
+			}
 
 			const newElement = {
 				id: `img-${Date.now()}`,
@@ -553,11 +568,12 @@ const Board = observer(() => {
 				type: 'image',
 				x: pos.x,
 				y: pos.y,
-				width: 200,
-				height: 150,
+				width: scaledWidth,
+				height: scaledHeight,
 				imageUrl: url,
 				isDragging: false,
 			};
+			console.log("pos", newElement.x, newElement.y)
 
 			handleCreateElement(newElement);
 		} catch (error) {

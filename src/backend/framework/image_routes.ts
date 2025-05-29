@@ -34,6 +34,7 @@ export function createImageRouter() {
             if (!req.file) {
                 return res.status(400).json({ error: "No image uploaded" });
             }
+            const metadata = await sharp(req.file.buffer).metadata();
 
             const optimizedImage = await sharp(req.file.buffer)
                 .resize(1200, null, { fit: 'inside', withoutEnlargement: true })
@@ -44,7 +45,11 @@ export function createImageRouter() {
             const imagePath = path.join(imagesDir, filename);
 
             await fs.promises.writeFile(imagePath, optimizedImage);
-            res.status(201).json({ url: `/images/${filename}` });
+            res.status(201).json({
+                url: `/images/${filename}`,
+                width: metadata.width,
+                height: metadata.height
+            });
 
         } catch (error) {
             console.error('Image upload error:', error);
