@@ -39,6 +39,7 @@ const Board = observer(() => {
 	const rectRefs = useRef(new Map());
 	const [isConnected, setIsConnected] = useState(false);
 	const [isDraggingOver, setIsDraggingOver] = useState(false);
+	const [showColorPicker, setShowColorPicker] = useState(false)
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -349,6 +350,7 @@ const Board = observer(() => {
 		URL.revokeObjectURL(url);
 	};
 	const handleContextMenu = (e) => {
+		console.log(e.target)
 		e.evt.preventDefault();
 		if (e.target === e.target.getStage()) {
 			return;
@@ -365,6 +367,12 @@ const Board = observer(() => {
 		const targetId = e.target.hasName('selectable')
 			? e.target.id()
 			: e.target.getParent().id();
+		if (e.target.hasName("image")) {
+			setShowColorPicker(false)
+		}
+		else {
+			setShowColorPicker(true)
+		}
 
 		setShowMenu(true);
 		setSelectedId(targetId);
@@ -679,6 +687,7 @@ const Board = observer(() => {
 					setSelectedColor={setSelectedColor}
 					onColorChange={handleColorChange}
 					onDelete={handleDelete}
+					showColorPicker={showColorPicker}
 					onClose={() => setShowMenu(false)}
 				/>
 			)}

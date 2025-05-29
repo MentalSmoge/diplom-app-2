@@ -8,6 +8,7 @@ const ContextMenu = ({
     setSelectedColor,
     onColorChange,
     onDelete,
+    showColorPicker,
     onClose
 }) => {
     const handleClick = (e) => {
@@ -31,29 +32,32 @@ const ContextMenu = ({
             }}
             onClick={handleClick}
         >
-            <CirclePicker
-                color={selectedColor}
-                onChangeComplete={onColorChange}
-                onChange={(color) => { setSelectedColor(color) }}
-                width={'250px'}
-                colors={[
-                    // Первая строка: основные
-                    '#404040', '#DF3838', '#31EF31', '#2099EF', '#EFEF33',
-                    // Вторая строка: приглушенные
-                    '#000000', '#8B1010', '#228B22', '#0A4F8D', '#C5A838',
-                    // Третья строка: пастельные
-                    '#B5B5B5', '#FD927B', '#AFFF9C', '#9FE2F8', '#FFF080'
-                ]}
-            />
-
-            <ChromePicker
-                color={selectedColor}
-                onChangeComplete={onColorChange}
-                onChange={(color) => { setSelectedColor(color) }}
-                disableAlpha
-                style={{ boxShadow: 'none' }}
-                width={'200px'}
-            />
+            {
+                showColorPicker &&
+                <CirclePicker
+                    color={selectedColor}
+                    onChangeComplete={onColorChange}
+                    onChange={(color) => { setSelectedColor(color) }}
+                    width={'250px'}
+                    colors={[
+                        // Первая строка: основные
+                        '#404040', '#DF3838', '#31EF31', '#2099EF', '#EFEF33',
+                        // Вторая строка: приглушенные
+                        '#000000', '#8B1010', '#228B22', '#0A4F8D', '#C5A838',
+                        // Третья строка: пастельные
+                        '#B5B5B5', '#FD927B', '#AFFF9C', '#9FE2F8', '#FFF080'
+                    ]}
+                />}
+            {
+                showColorPicker &&
+                <ChromePicker
+                    color={selectedColor}
+                    onChangeComplete={onColorChange}
+                    onChange={(color) => { setSelectedColor(color) }}
+                    disableAlpha
+                    style={{ boxShadow: 'none' }}
+                    width={'200px'}
+                />}
 
             <button
                 style={{

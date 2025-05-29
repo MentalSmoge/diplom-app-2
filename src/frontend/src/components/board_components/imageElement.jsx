@@ -56,7 +56,7 @@ const ImageElement = ({ element, onDragStart, onDragEnd, rectRefs }) => {
             draggable
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
-            name="selectable"
+            name="selectable image"
             ref={imageRef}
         />
     );
