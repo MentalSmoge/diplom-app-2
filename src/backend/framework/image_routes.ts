@@ -16,6 +16,15 @@ export function createImageRouter() {
         console.log(`Created images directory: ${imagesDir}`);
     }
 
+    const deleteImageFile = (filename: string) => {
+        const imagePath = path.join(imagesDir, filename);
+        if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+            return true;
+        }
+        return false;
+    };
+
     // Загрузка изображения
     // @ts-ignore
     router.post('/upload', upload.single('image'), async (req, res) => {
@@ -40,6 +49,26 @@ export function createImageRouter() {
         } catch (error) {
             console.error('Image upload error:', error);
             res.status(500).json({ error: "Error processing image" });
+        }
+    });
+    // Удаление изображения
+    // @ts-ignore
+    router.delete('/delete/:filename', (req, res) => {
+        try {
+            const { filename } = req.params;
+            if (!filename) {
+                return res.status(400).json({ error: "Filename is required" });
+            }
+
+            const deleted = deleteImageFile(filename);
+            if (deleted) {
+                return res.status(200).json({ message: "Image deleted successfully" });
+            } else {
+                return res.status(404).json({ error: "Image not found" });
+            }
+        } catch (error) {
+            console.error('Image delete error:', error);
+            res.status(500).json({ error: "Error deleting image" });
         }
     });
 

@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { ElementRepository, Element } from '../domain/element';
 
 export class ElementService {
@@ -36,9 +37,20 @@ export class ElementService {
 
     async deleteElement(elementId: string): Promise<void> {
         const existingElement = this.elements.find((el) => el.id === elementId);
-        // if (!existingElement) {
-        //     throw new Error('Element not found');
-        // }
+        if (!existingElement) {
+            throw new Error('Element not found');
+        }
+        console.log("delete", existingElement)
+        // @ts-ignore
+        if (existingElement.type === 'image' && existingElement.imageUrl) {
+            try {
+                // @ts-ignore
+                const filename = existingElement.imageUrl.split('/').pop();
+                await axios.delete(`http://localhost:8080/delete/${filename}`);
+            } catch (error) {
+                console.error('Failed to delete image file:', error);
+            }
+        }
         this.elements = this.elements.filter((el) => el.id !== elementId);
         await this.elementRepository.deleteElement(elementId);
     }
