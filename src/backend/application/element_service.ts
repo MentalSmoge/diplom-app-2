@@ -29,7 +29,8 @@ export class ElementService {
     async updateElement(element: Element): Promise<void> {
         const existingElement = this.elements.find((el) => el.id === element.id);
         if (!existingElement) {
-            throw new Error('Element not found');
+            return
+            // throw new Error('Element not found');
         }
         this.elements = this.elements.map((el) => (el.id === element.id ? element : el));
         await this.elementRepository.saveElement(element);
@@ -38,7 +39,8 @@ export class ElementService {
     async deleteElement(elementId: string): Promise<void> {
         const existingElement = this.elements.find((el) => el.id === elementId);
         if (!existingElement) {
-            throw new Error('Element not found');
+            return
+            // throw new Error('Element not found');
         }
         console.log("delete", existingElement)
         // @ts-ignore

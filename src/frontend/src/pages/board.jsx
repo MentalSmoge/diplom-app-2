@@ -381,6 +381,16 @@ const Board = observer(() => {
 		if (!selectedTool || e.target !== e.target.getStage()) return;
 		if (isSpacePressed) return;
 
+		if (selectedTool === 'eraser') {
+			if (e.target === e.target.getStage()) return;
+
+			const clickedElement = elements.find(el => el.id === e.target.id());
+			if (clickedElement && clickedElement.type === 'brush') {
+				handleDeleteElement(clickedElement.id);
+			}
+			return;
+		}
+
 		const stage = e.target.getStage();
 		const pos = stage.getRelativePointerPosition();
 		setStartPos(pos);
@@ -465,6 +475,18 @@ const Board = observer(() => {
 		});
 	};
 	const handleMouseMove = (e) => {
+		if (selectedTool === 'eraser') {
+			// Если выбран ластик и мы перемещаем мышь с зажатой кнопкой
+			if (e.evt.buttons !== 1) return; // Проверяем, что левая кнопка мыши нажата
+
+			if (e.target === e.target.getStage()) return;
+
+			const clickedElement = elements.find(el => el.id === e.target.id());
+			if (clickedElement && clickedElement.type === 'brush') {
+				handleDeleteElement(clickedElement.id);
+			}
+			return;
+		}
 		if (!drawing || !tempElement) return;
 		console.log("handleMouseMve", tempElement)
 
@@ -697,6 +719,12 @@ const Board = observer(() => {
 					style={{ background: selectedTool === 'brush' ? '#ddd' : '#fff' }}
 				>
 					✏️ Brush
+				</button>
+				<button
+					onClick={() => setSelectedTool('eraser')}
+					style={{ background: selectedTool === 'eraser' ? '#ddd' : '#fff' }}
+				>
+					🧽 Eraser
 				</button>
 				<button onClick={handleExport}>📤 Export</button>
 			</div>
