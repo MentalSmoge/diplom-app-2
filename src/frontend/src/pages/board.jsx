@@ -1,16 +1,16 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { Stage, Layer, Image, Rect, Transformer } from "react-konva";
+import { Stage, Layer, Image, Rect, Transformer, Line } from "react-konva";
 import { socket } from "../socket";
 import { useParams, useNavigate } from "react-router-dom";
 import { checkBoardAccess } from "../api/auth";
 import EditableText from "../components/board_components/text";
 import { RectangleElement } from "../components/board_components/rect";
 import EdgeArrow from "../components/board_components/arrow";
+import BrushElement from "../components/board_components/brush";
 import { observer } from "mobx-react";
 import { Document, Paragraph, ImageRun, Packer, HeadingLevel } from "docx";
 import * as utils_export from "../utils/utils_export"
 import ContextMenu from '../components/contextMenu';
-import useImage from 'use-image';
 import "./Toolbar.css"
 import ImageElement from "../components/board_components/imageElement";
 
@@ -41,6 +41,7 @@ const Board = observer(() => {
 	const [isDraggingOver, setIsDraggingOver] = useState(false);
 	const [showColorPicker, setShowColorPicker] = useState(false)
 	const navigate = useNavigate();
+	const [currentLine, setCurrentLine] = useState(null);
 
 	useEffect(() => {
 		const handleBoardState = (serverElements) => setElements(serverElements);
@@ -121,8 +122,6 @@ const Board = observer(() => {
 	}, []);
 
 	const handleCreateElement = (element) => {
-		console.log(isConnected)
-		console.log(element)
 		socket.emit("element-create", { boardId, element });
 	};
 
@@ -404,6 +403,19 @@ const Board = observer(() => {
 			};
 			handleCreateElement(newElement);
 			setSelectedTool(null);
+			setDrawing(false);
+			return;
+		}
+		if (selectedTool === 'brush') {
+			setTempElement({
+				id: Date.now().toString(),
+				type: 'brush',
+				boardId: numberBoardId,
+				points: [pos.x, pos.y],
+				stroke: selectedColor,
+				strokeWidth: 5,
+				isDragging: false,
+			});
 			return;
 		}
 		if (selectedTool === 'arrow') {
@@ -415,6 +427,21 @@ const Board = observer(() => {
 				y_start: pos.y,
 				x_end: pos.x,
 				y_end: pos.y,
+				fill: selectedColor ?? '#000000',
+				isDragging: false,
+				onDragStart: handleDragStart,
+				onDragEnd: handleDragEnd,
+			});
+			return;
+		}
+		if (selectedTool === 'line') {
+			setTempElement({
+				id: Date.now().toString(),
+				type: 'line',
+				boardId: numberBoardId,
+				points: [pos.x, pos.y, pos.x, pos.y],
+				stroke: selectedColor,
+				strokeWidth: 2,
 				isDragging: false,
 				onDragStart: handleDragStart,
 				onDragEnd: handleDragEnd,
@@ -439,12 +466,21 @@ const Board = observer(() => {
 	};
 	const handleMouseMove = (e) => {
 		if (!drawing || !tempElement) return;
+		console.log("handleMouseMve", tempElement)
 
 		const stage = e.target.getStage();
 		const pos = stage.getRelativePointerPosition();
 		const newWidth = pos.x - startPos.x;
 		const newHeight = pos.y - startPos.y;
+		console.log("DSADAS")
 
+		if (selectedTool === 'brush') {
+			setTempElement({
+				...tempElement,
+				points: [...tempElement.points, pos.x, pos.y],
+			});
+			return;
+		}
 		if (tempElement.type === 'arrow') {
 			setTempElement({
 				...tempElement,
@@ -453,7 +489,24 @@ const Board = observer(() => {
 				width: newWidth,
 				height: newHeight,
 			});
-		} else {
+			console.log("SAS")
+			return;
+		}
+		if (tempElement?.type === 'line') {
+			setTempElement({
+				...tempElement,
+				points: [
+					tempElement.points[0], // Начальная X
+					tempElement.points[1], // Начальная Y
+					pos.x, // Текущая X
+					pos.y, // Текущая Y
+				],
+				width: newWidth,
+				height: newHeight,
+			});
+			return;
+		}
+		else {
 			setTempElement({
 				...tempElement,
 				width: pos.x - tempElement.x,
@@ -463,7 +516,14 @@ const Board = observer(() => {
 	};
 	const handleMouseUp = () => {
 		if (!drawing || !tempElement) return;
-		console.log(tempElement)
+		console.log("handleMouseUp", tempElement)
+
+		if (selectedTool === 'brush') {
+			if (tempElement.points.length > 2) {
+				handleCreateElement(tempElement);
+			}
+			setTempElement(null);
+		}
 
 		if (Math.abs(tempElement.width) > 5 && Math.abs(tempElement.height) > 5) {
 			const newElement = {
@@ -532,54 +592,79 @@ const Board = observer(() => {
 		const files = e.dataTransfer.files;
 
 		if (files.length === 0) return;
+		console.log(files[0])
 
 		const file = files[0];
-		if (!file.type.startsWith('image/')) return;
-		console.log(file)
-		try {
-			const formData = new FormData();
-			formData.append('image', file);
-
-			const response = await fetch('http://localhost:8080/upload', {
-				method: 'POST',
-				body: formData,
-				credentials: 'include',
-			});
-
-			if (!response.ok) throw new Error('Upload failed');
-
-			const { url, width, height } = await response.json();
-			const maxDimension = 500; // Максимальный размер по любой из сторон
-			let scaledWidth = width;
-			let scaledHeight = height;
-			if (width > height && width > maxDimension) {
-				const scale = maxDimension / width;
-				scaledWidth = maxDimension;
-				scaledHeight = Math.round(height * scale);
-			} else if (height > maxDimension) {
-				const scale = maxDimension / height;
-				scaledHeight = maxDimension;
-				scaledWidth = Math.round(width * scale);
+		if (file.type.startsWith('text/plain')) {
+			try {
+				const fileContent = await file.text();
+				const newElement = {
+					id: `text-${Date.now()}`,
+					boardId: numberBoardId,
+					type: 'text',
+					x: pos.x,
+					y: pos.y,
+					text: fileContent,
+					width: 700,
+					height: 40,
+					fill: '#000000',
+					isDragging: false,
+				};
+				console.log("Created text element from file:", newElement);
+				handleCreateElement(newElement);
+			} catch (error) {
+				console.error('Error reading text file:', error);
+				alert('Failed to read text file');
 			}
+			return;
+		};
+		if (file.type.startsWith('image/')) {
+			try {
+				const formData = new FormData();
+				formData.append('image', file);
 
-			const newElement = {
-				id: `img-${Date.now()}`,
-				boardId: numberBoardId,
-				type: 'image',
-				x: pos.x,
-				y: pos.y,
-				width: scaledWidth,
-				height: scaledHeight,
-				imageUrl: url,
-				isDragging: false,
-			};
-			console.log("pos", newElement.x, newElement.y)
+				const response = await fetch('http://localhost:8080/upload', {
+					method: 'POST',
+					body: formData,
+					credentials: 'include',
+				});
 
-			handleCreateElement(newElement);
-		} catch (error) {
-			console.error('Upload error:', error);
-			alert('Failed to upload image');
+				if (!response.ok) throw new Error('Upload failed');
+
+				const { url, width, height } = await response.json();
+				const maxDimension = 500; // Максимальный размер по любой из сторон
+				let scaledWidth = width;
+				let scaledHeight = height;
+				if (width > height && width > maxDimension) {
+					const scale = maxDimension / width;
+					scaledWidth = maxDimension;
+					scaledHeight = Math.round(height * scale);
+				} else if (height > maxDimension) {
+					const scale = maxDimension / height;
+					scaledHeight = maxDimension;
+					scaledWidth = Math.round(width * scale);
+				}
+
+				const newElement = {
+					id: `img-${Date.now()}`,
+					boardId: numberBoardId,
+					type: 'image',
+					x: pos.x,
+					y: pos.y,
+					width: scaledWidth,
+					height: scaledHeight,
+					imageUrl: url,
+					isDragging: false,
+				};
+				console.log("pos", newElement.x, newElement.y)
+
+				handleCreateElement(newElement);
+			} catch (error) {
+				console.error('Upload error:', error);
+				alert('Failed to upload image');
+			}
 		}
+
 	}, [numberBoardId, handleCreateElement]);
 	return (
 		<div
@@ -606,6 +691,12 @@ const Board = observer(() => {
 					style={{ background: selectedTool === 'rect' ? '#ddd' : '#fff' }}
 				>
 					▭ Rectangle
+				</button>
+				<button
+					onClick={() => setSelectedTool('brush')}
+					style={{ background: selectedTool === 'brush' ? '#ddd' : '#fff' }}
+				>
+					✏️ Brush
 				</button>
 				<button onClick={handleExport}>📤 Export</button>
 			</div>
@@ -646,6 +737,10 @@ const Board = observer(() => {
 							<EdgeArrow key={element.id} element={element} onDragEnd={handleDragEndArrow} onDragStart={handleDragStart} rectRefs={rectRefs} />
 						) : element.type === "image" ? (
 							<ImageElement key={element.id} element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} />
+						) : element.type === "line" ? (
+							<LineElement key={element.id} element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} />
+						) : element.type === "brush" ? (
+							<BrushElement key={element.id} element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} />
 						) :
 							null
 					)}
@@ -673,6 +768,15 @@ const Board = observer(() => {
 								onDragStart={() => { }}
 								rectRefs={{ current: new Map() }}
 								onUpdateElement={() => { }}
+							/>
+						) : tempElement.type === 'brush' ? (
+							<Line
+								points={tempElement.points}
+								stroke={tempElement.stroke}
+								strokeWidth={tempElement.strokeWidth}
+								tension={0.5}
+								lineCap="round"
+								lineJoin="round"
 							/>
 						) : null
 					)}
