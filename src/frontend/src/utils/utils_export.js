@@ -93,6 +93,12 @@ export function getGroupBoundingBox(group, margin = 10) {
             width = obj.width;
             height = obj.height;
         }
+        else {
+            x = obj.x;
+            y = obj.y;
+            width = obj.width;
+            height = obj.height;
+        }
 
         // Обновляем min/max значения
         minX = Math.min(minX, x);
