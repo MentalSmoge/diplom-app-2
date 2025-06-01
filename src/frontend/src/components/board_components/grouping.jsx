@@ -27,8 +27,8 @@ export const Grouping = ({
             rotation={element.rotation}
             skewX={element.skewX}
             skewY={element.skewY}
-            draggable
-            zIndex={-1000}
+            // draggable
+            // zIndex={-1000}
             onDragStart={onDragStart}
             onDragEnd={(e) => {
                 const node = e.target;
@@ -78,6 +78,8 @@ export const Grouping = ({
                 shadowOpacity={0.6}
                 skewX={element.skewX}
                 skewY={element.skewY}
+                draggable={false}
+                name='ignore'
             />
             <EditableText
                 element={{

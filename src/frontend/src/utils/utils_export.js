@@ -27,11 +27,13 @@ export function doRectanglesOverlap(rect1, rect2, threshold = 0) {
         box1.y + box1.height + threshold > box2.y
     );
 }
-export function findGroups(objects, threshold = 0) {
-    const groups = [];
+export function findGroups(objects, groupings = [], threshold = 0) {
+    const naturalGroups = [];
     const visited = new Set();
 
-    for (const obj of objects) {
+    const filteredObjects = objects.filter(obj => !groupings.includes(obj));
+
+    for (const obj of filteredObjects) {
         if (visited.has(obj.id)) continue;
 
         const queue = [obj];
@@ -44,8 +46,7 @@ export function findGroups(objects, threshold = 0) {
             visited.add(current.id);
             currentGroup.push(current);
 
-            // Ищем соседей
-            for (const other of objects) {
+            for (const other of filteredObjects) {
                 if (
                     other.id !== current.id &&
                     !visited.has(other.id) &&
@@ -57,12 +58,73 @@ export function findGroups(objects, threshold = 0) {
         }
 
         if (currentGroup.length > 0) {
-            groups.push(currentGroup);
+            naturalGroups.push(currentGroup);
+        }
+    }
+    console.log(naturalGroups)
+
+    const resultGroups = [];
+
+    for (const grouping of groupings) {
+        const groupBounds = {
+            x: grouping.x,
+            y: grouping.y,
+            width: grouping.width,
+            height: grouping.height
+        };
+
+        const elementsInside = [];
+        const groupsToRemove = new Set();
+
+        for (let i = 0; i < naturalGroups.length; i++) {
+            const naturalGroup = naturalGroups[i];
+            const hasOverlap = naturalGroup.some(el => {
+                const elBounds = getBoundingBox(el);
+                return (
+                    elBounds.x >= groupBounds.x &&
+                    elBounds.y >= groupBounds.y &&
+                    elBounds.x + elBounds.width <= groupBounds.x + groupBounds.width &&
+                    elBounds.y + elBounds.height <= groupBounds.y + groupBounds.height
+                );
+            });
+
+            if (hasOverlap) {
+                elementsInside.push(naturalGroup); // Добавляем элементы, а не всю группу
+                groupsToRemove.add(i); // Помечаем группу для удаления
+            }
+        }
+        console.log(groupsToRemove)
+        console.log(naturalGroups)
+        Array.from(groupsToRemove).sort((a, b) => b - a).forEach(index => {
+            naturalGroups.splice(index, 1);
+        });
+        console.log(naturalGroups)
+
+        if (elementsInside.length > 0) {
+            console.log(resultGroups)
+            resultGroups.push({
+                type: 'grouping',
+                grouping,
+                elements: elementsInside
+            });
+            console.log(resultGroups[0])
         }
     }
 
+    for (const naturalGroup of naturalGroups) {
+        const isInAnyGrouping = resultGroups.some(g =>
+            g.elements.some(el => naturalGroup.includes(el))
+        );
 
-    return groups;
+        if (!isInAnyGrouping) {
+            resultGroups.push({
+                type: 'natural',
+                elements: naturalGroup
+            });
+        }
+    }
+    console.log(resultGroups)
+    return resultGroups;
 }
 export function getGroupBoundingBox(group, margin = 10) {
     if (group.length === 0) return null;

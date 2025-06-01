@@ -8,13 +8,15 @@ import BoardsStore from "./store_boards"
 import DeleteModal from "../components/modals/modal_delete"
 import DeleteModalStore from "../components/modals/modal_delete/DeleteModalStore"
 import { observer } from 'mobx-react-lite';
+import { boardStore } from "../stores/boardStore";
 
 function Boards() {
     const { projectId } = useParams(); // Получаем ID проекта из URL
     const navigate = useNavigate();
 
 
-    const handleBoardButton = (boardId) => {
+    const handleBoardButton = (boardId, title) => {
+        boardStore.setCurrentTitle(title)
         navigate(`/boards/${boardId}`);
     }
     const handleCreateButton = () => {
@@ -56,7 +58,7 @@ function Boards() {
                     <ProjectCard
                         title={project.title}
                         description=""
-                        onOpen={() => handleBoardButton(project.id)}
+                        onOpen={() => handleBoardButton(project.id, project.title)}
                         onDelete={() => handleDeleteButton(project.id)}
                         key={project.id}
                     />

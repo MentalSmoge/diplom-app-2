@@ -9,14 +9,15 @@ import EdgeArrow from "../components/board_components/arrow";
 import BrushElement from "../components/board_components/brush";
 import TableElement from "../components/board_components/tableElement";
 import { observer } from "mobx-react";
-import { Document, Paragraph, ImageRun, Packer, HeadingLevel } from "docx";
+import { Document, Paragraph, ImageRun, Packer, HeadingLevel, AlignmentType } from "docx";
 import * as utils_export from "../utils/utils_export"
 import ContextMenu from '../components/contextMenu';
 import "./Toolbar.css"
 import ImageElement from "../components/board_components/imageElement";
 import { Grouping } from "../components/board_components/grouping";
+import { boardStore } from "../stores/boardStore";
 
-const Board = observer(() => {
+const Board = observer(({ title }) => {
 	const { boardId } = useParams(); // Получаем ID доски из URL
 	const [selectedColor, setSelectedColor] = useState('#e55039');
 	const [isSpacePressed, setIsSpacePressed] = useState(false);
@@ -298,56 +299,178 @@ const Board = observer(() => {
 		setShowMenu(false);
 		setSelectedIds([]);
 	}, [selectedId, handleDeleteElement]);
+	const getFormattedDateTime = () => {
+		const now = new Date();
+
+		const year = now.getFullYear();
+		const month = String(now.getMonth() + 1).padStart(2, '0'); // Месяцы 0-11
+		const day = String(now.getDate()).padStart(2, '0');
+		const hours = String(now.getHours()).padStart(2, '0');
+		const minutes = String(now.getMinutes()).padStart(2, '0');
+		const seconds = String(now.getSeconds()).padStart(2, '0');
+
+		return `${day}-${month}-${String(year).slice(-2)}_${hours}-${minutes}-${seconds}`;
+	};
 	const handleExport = async () => {
 		const stage = stageRef.current;
 		stage.scale({ x: 1, y: 1 });
-		const groups = utils_export.findGroups(elements, 50);
-		const imageRuns = [];
-		for (const element of groups) {
-			const dimensions = utils_export.getGroupBoundingBox(element)
-			const image = await stageRef.current.toImage({
-				pixelRatio: 2,
-				x: dimensions.x + (stageRef.current?.attrs?.x ?? 0),
-				y: dimensions.y + (stageRef.current?.attrs?.y ?? 0),
-				width: dimensions.width,
-				height: dimensions.height
-			});
-			const canvas = document.createElement('canvas');
-			canvas.width = image.width;
-			canvas.height = image.height;
-			const ctx = canvas.getContext('2d');
-			ctx.drawImage(image, 0, 0);
 
-			const blob = await new Promise(resolve =>
-				canvas.toBlob(resolve, 'image/png', 0.92)
-			);
+		// Получаем все элементы grouping
+		const groupings = elements.filter(el => el.type === "grouping");
 
-			const arrayBuffer = await blob.arrayBuffer();
-			console.log(arrayBuffer)
-			imageRuns.push(
-				new ImageRun({
-					type: 'png',
-					data: arrayBuffer,
-					transformation: {
-						width: dimensions.width * 0.75,
-						height: dimensions.height * 0.75,
-					},
+		// Находим группы элементов (исключая сами groupings)
+		const groups = utils_export.findGroups(
+			elements.filter(el => el.type !== "grouping"),
+			groupings,
+			50
+		);
+		console.log(groups)
+		// return
+		console.log(groups.filter(sas => sas.type === 'grouping'))
+		// Собираем все элементы для документа
+		const docChildren = [];
+
+		// Обрабатываем каждую группу
+		for (const group of groups.filter(sas => sas.type === 'grouping')) {
+			console.log(group)
+			docChildren.push(
+				new Paragraph({
+					text: group.grouping.text,
+					heading: HeadingLevel.HEADING_1,
+					alignment: AlignmentType.CENTER,
 				})
 			);
-		};
+			for (const elem of group.elements) {
+				console.log(elem)
+
+				// Получаем границы группы
+				const dimensions = utils_export.getGroupBoundingBox(elem);
+				console.log("dimensions", dimensions, elem)
+
+				// Создаем изображение группы
+				const image = await stageRef.current.toImage({
+					pixelRatio: 2,
+					x: dimensions.x + (stageRef.current?.attrs?.x ?? 0),
+					y: dimensions.y + (stageRef.current?.attrs?.y ?? 0),
+					width: dimensions.width,
+					height: dimensions.height
+				});
+
+				const canvas = document.createElement('canvas');
+				canvas.width = image.width;
+				canvas.height = image.height;
+				const ctx = canvas.getContext('2d');
+				ctx.drawImage(image, 0, 0);
+
+				const blob = await new Promise(resolve =>
+					canvas.toBlob(resolve, 'image/png', 0.92)
+				);
+
+				const arrayBuffer = await blob.arrayBuffer();
+
+
+
+				// Добавляем изображение
+				docChildren.push(
+					new Paragraph({
+						children: [
+							new ImageRun({
+								type: 'png',
+								data: arrayBuffer,
+								transformation: {
+									width: dimensions.width * 0.75,
+									height: dimensions.height * 0.75,
+								},
+							})
+						]
+					})
+				);
+			}
+		}
+		const ungrouped = groups.filter(group => group.type === 'natural');
+		console.log(ungrouped)
+		if (ungrouped) {
+			docChildren.push(
+				new Paragraph({
+					text: "Остальные",
+					heading: HeadingLevel.HEADING_1,
+					alignment: AlignmentType.CENTER,
+				})
+			);
+			for (const group of ungrouped) {
+				const dimensions = utils_export.getGroupBoundingBox(group.elements);
+
+				// Создаем изображение группы
+				const image = await stageRef.current.toImage({
+					pixelRatio: 2,
+					x: dimensions.x + (stageRef.current?.attrs?.x ?? 0),
+					y: dimensions.y + (stageRef.current?.attrs?.y ?? 0),
+					width: dimensions.width,
+					height: dimensions.height
+				});
+
+				const canvas = document.createElement('canvas');
+				canvas.width = image.width;
+				canvas.height = image.height;
+				const ctx = canvas.getContext('2d');
+				ctx.drawImage(image, 0, 0);
+
+				const blob = await new Promise(resolve =>
+					canvas.toBlob(resolve, 'image/png', 0.92)
+				);
+
+				const arrayBuffer = await blob.arrayBuffer();
+				docChildren.push(
+					new Paragraph({
+						children: [
+							new ImageRun({
+								type: 'png',
+								data: arrayBuffer,
+								transformation: {
+									width: dimensions.width * 0.75,
+									height: dimensions.height * 0.75,
+								},
+							})
+						]
+					})
+				);
+			}
+		}
+
+
+		// Создаем документ только один раз в конце
 		const doc = new Document({
+			title: boardStore.currentTitle || "Document",
+			styles: {
+				default: {
+					heading1: {
+						run: {
+							size: 32,
+							bold: true,
+							color: "000000",
+							font: "Times New Roman",
+						},
+						paragraph: {
+							spacing: {
+								after: 120,
+							},
+						},
+					},
+				},
+			},
 			sections: [{
 				properties: {},
-				children: imageRuns.map(imageRun =>
-					new Paragraph({ children: [imageRun] })
-				)
+				children: docChildren
 			}]
 		});
+		console.log(doc)
+		// return
+		// Экспортируем документ
 		const docBlob = await Packer.toBlob(doc);
 		const url = URL.createObjectURL(docBlob);
 		const link = document.createElement('a');
 		link.href = url;
-		link.download = 'konva-export.docx';
+		link.download = `${boardStore.currentTitle || "Document"} ${getFormattedDateTime()}.docx`;
 		document.body.appendChild(link);
 		link.click();
 		document.body.removeChild(link);
@@ -410,7 +533,8 @@ const Board = observer(() => {
 		e.cancelBubble = true;
 	};
 	const handleMouseDown = (e) => {
-		if (!selectedTool || e.target !== e.target.getStage()) return;
+		console.log(e.target)
+		if (!selectedTool || (e.target !== e.target.getStage() && !e.target.hasName('ignore'))) return;
 		if (isSpacePressed) return;
 
 		if (selectedTool === 'eraser') {
@@ -825,6 +949,20 @@ const Board = observer(() => {
 				onWheel={handleWheel}
 			>
 				<Layer>
+
+					{elements.map((element) =>
+						element.type === "grouping" ? (
+							<Grouping
+								key={element.id}
+								element={element}
+								onDragStart={handleDragStart}
+								onDragEnd={handleDragEnd}
+								rectRefs={rectRefs}
+								onUpdateElement={handleUpdateElement}
+							/>
+						) :
+							null
+					)}
 					{elements.map((element) =>
 						element.type === "text" ? (
 							<EditableText key={element.id} element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} transformerRef={transformerRef} onUpdateElement={handleUpdateElement} />
@@ -848,15 +986,6 @@ const Board = observer(() => {
 								onUpdateElement={handleUpdateElement}
 								isSelected={selectedIds.includes(element.id)}
 								onSelect={() => setSelectedIds([element.id])}
-							/>
-						) : element.type === "grouping" ? (
-							<Grouping
-								key={element.id}
-								element={element}
-								onDragStart={handleDragStart}
-								onDragEnd={handleDragEnd}
-								rectRefs={rectRefs}
-								onUpdateElement={handleUpdateElement}
 							/>
 						) :
 							null

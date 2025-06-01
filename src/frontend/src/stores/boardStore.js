@@ -4,6 +4,10 @@ class BoardStore {
     elements = []; // Массив элементов текущей доски
     currentBoardId = null;
     selectedIds = []; // Выбранные элементы (опционально)
+    currentTitle = ""
+    setCurrentTitle(title) {
+        this.currentTitle = title
+    }
 
     constructor() {
         makeAutoObservable(this);
