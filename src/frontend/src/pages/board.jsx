@@ -7,12 +7,14 @@ import EditableText from "../components/board_components/text";
 import { RectangleElement } from "../components/board_components/rect";
 import EdgeArrow from "../components/board_components/arrow";
 import BrushElement from "../components/board_components/brush";
+import TableElement from "../components/board_components/tableElement";
 import { observer } from "mobx-react";
 import { Document, Paragraph, ImageRun, Packer, HeadingLevel } from "docx";
 import * as utils_export from "../utils/utils_export"
 import ContextMenu from '../components/contextMenu';
 import "./Toolbar.css"
 import ImageElement from "../components/board_components/imageElement";
+import { Grouping } from "../components/board_components/grouping";
 
 const Board = observer(() => {
 	const { boardId } = useParams(); // Получаем ID доски из URL
@@ -40,6 +42,7 @@ const Board = observer(() => {
 	const [isConnected, setIsConnected] = useState(false);
 	const [isDraggingOver, setIsDraggingOver] = useState(false);
 	const [showColorPicker, setShowColorPicker] = useState(false)
+	const [showDelete, setShowDelete] = useState(false)
 	const navigate = useNavigate();
 	const [currentLine, setCurrentLine] = useState(null);
 
@@ -296,6 +299,8 @@ const Board = observer(() => {
 		setSelectedIds([]);
 	}, [selectedId, handleDeleteElement]);
 	const handleExport = async () => {
+		const stage = stageRef.current;
+		stage.scale({ x: 1, y: 1 });
 		const groups = utils_export.findGroups(elements, 50);
 		const imageRuns = [];
 		for (const element of groups) {
@@ -349,32 +354,59 @@ const Board = observer(() => {
 		URL.revokeObjectURL(url);
 	};
 	const handleContextMenu = (e) => {
-		console.log(e.target)
+		console.log(e.target);
 		e.evt.preventDefault();
-		if (e.target === e.target.getStage()) {
-			return;
-		}
 
 		const stage = e.target.getStage();
 		const containerRect = stage.container().getBoundingClientRect();
 		const pointerPosition = stage.getPointerPosition();
 
-		setMenuPosition({
-			x: containerRect.left + pointerPosition.x + 4,
-			y: containerRect.top + pointerPosition.y + 4
-		});
-		const targetId = e.target.hasName('selectable')
-			? e.target.id()
-			: e.target.getParent().id();
-		if (e.target.hasName("image")) {
-			setShowColorPicker(false)
+		// Определяем, какие элементы будут показаны
+		const showColorPicker = !e.target.hasName("image");
+		const showDelete = e.target !== e.target.getStage();
+
+		// Рассчитываем примерную высоту меню в зависимости от его содержимого
+		const menuWidth = 250; // Ширина CirclePicker
+		let menuHeight = 0;
+
+		if (showColorPicker) {
+			menuHeight += 320; // Высота CirclePicker + ChromePicker
 		}
-		else {
-			setShowColorPicker(true)
+		if (showDelete) {
+			menuHeight += 40; // Высота кнопки Delete
+		}
+		menuHeight += 20; // Добавляем отступы
+
+		// Вычисляем позицию меню (начальная позиция)
+		let x = containerRect.left + pointerPosition.x + 4;
+		let y = containerRect.top + pointerPosition.y - 60;
+
+		// Корректировка по горизонтали (если меню выходит за правый край)
+		if (x + menuWidth > window.innerWidth) {
+			x = window.innerWidth - menuWidth - 10; // 10px отступ от края
 		}
 
+		// Корректировка по вертикали
+		if (y + menuHeight > window.innerHeight) {
+			// Если не помещается снизу, показываем выше курсора
+			y = containerRect.top + pointerPosition.y - menuHeight - 10;
+		}
+		if (y < 0) {
+			// Если всё равно не помещается, прижимаем к верхнему краю
+			y = 10;
+		}
+
+		// Устанавливаем состояние
+		setMenuPosition({ x, y });
+		setShowColorPicker(showColorPicker);
+		setShowDelete(showDelete);
 		setShowMenu(true);
+
+		const targetId = e.target.hasName('selectable')
+			? e.target?.id()
+			: e.target?.getParent()?.id();
 		setSelectedId(targetId);
+
 		e.cancelBubble = true;
 	};
 	const handleMouseDown = (e) => {
@@ -405,6 +437,7 @@ const Board = observer(() => {
 				x: pos.x,
 				y: pos.y,
 				text: 'New Text',
+				fill: selectedColor ?? '#000000',
 				width: 100,
 				height: 40,
 				isDragging: false,
@@ -416,13 +449,33 @@ const Board = observer(() => {
 			setDrawing(false);
 			return;
 		}
+		if (selectedTool === 'table') {
+			const newElement = {
+				id: Date.now().toString(),
+				boardId: numberBoardId,
+				type: 'table',
+				x: pos.x,
+				y: pos.y,
+				data: {
+					rows: 3,
+					cols: 3,
+					cells: Array(3).fill().map(() => Array(3).fill('')),
+					colWidths: Array(3).fill(100),
+					rowHeights: Array(3).fill(40)
+				},
+				isDragging: false,
+			};
+			handleCreateElement(newElement);
+			setSelectedTool(null);
+			return;
+		}
 		if (selectedTool === 'brush') {
 			setTempElement({
 				id: Date.now().toString(),
 				type: 'brush',
 				boardId: numberBoardId,
 				points: [pos.x, pos.y],
-				stroke: selectedColor,
+				stroke: selectedColor.hex ?? selectedColor,
 				strokeWidth: 5,
 				isDragging: false,
 			});
@@ -444,18 +497,24 @@ const Board = observer(() => {
 			});
 			return;
 		}
-		if (selectedTool === 'line') {
-			setTempElement({
+		if (selectedTool === 'grouping') {
+			const newElement = {
 				id: Date.now().toString(),
-				type: 'line',
 				boardId: numberBoardId,
-				points: [pos.x, pos.y, pos.x, pos.y],
-				stroke: selectedColor,
-				strokeWidth: 2,
+				type: 'grouping',
+				x: pos.x,
+				y: pos.y,
+				width: 200,
+				height: 100,
+				text: 'Text',
+				fill: '#ffffff',
+				stroke: '#000000',
 				isDragging: false,
 				onDragStart: handleDragStart,
 				onDragEnd: handleDragEnd,
-			});
+			};
+			handleCreateElement(newElement);
+			setSelectedTool(null);
 			return;
 		}
 
@@ -470,7 +529,7 @@ const Board = observer(() => {
 			isDragging: false,
 			onDragStart: handleDragStart,
 			onDragEnd: handleDragEnd,
-			fill: '#e55039', // Цвет по умолчанию
+			fill: selectedColor,
 			stroke: '#2d3436',
 		});
 	};
@@ -488,13 +547,11 @@ const Board = observer(() => {
 			return;
 		}
 		if (!drawing || !tempElement) return;
-		console.log("handleMouseMve", tempElement)
 
 		const stage = e.target.getStage();
 		const pos = stage.getRelativePointerPosition();
 		const newWidth = pos.x - startPos.x;
 		const newHeight = pos.y - startPos.y;
-		console.log("DSADAS")
 
 		if (selectedTool === 'brush') {
 			setTempElement({
@@ -726,6 +783,18 @@ const Board = observer(() => {
 				>
 					🧽 Eraser
 				</button>
+				<button
+					onClick={() => setSelectedTool('table')}
+					style={{ background: selectedTool === 'table' ? '#ddd' : '#fff' }}
+				>
+					🏷 Table
+				</button>
+				<button
+					onClick={() => setSelectedTool('grouping')}
+					style={{ background: selectedTool === 'grouping' ? '#ddd' : '#fff' }}
+				>
+					▭ Group
+				</button>
 				<button onClick={handleExport}>📤 Export</button>
 			</div>
 			{isDraggingOver && (
@@ -769,6 +838,26 @@ const Board = observer(() => {
 							<LineElement key={element.id} element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} />
 						) : element.type === "brush" ? (
 							<BrushElement key={element.id} element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} />
+						) : element.type === "table" ? (
+							<TableElement
+								key={element.id}
+								element={element}
+								onDragStart={handleDragStart}
+								onDragEnd={handleDragEnd}
+								rectRefs={rectRefs}
+								onUpdateElement={handleUpdateElement}
+								isSelected={selectedIds.includes(element.id)}
+								onSelect={() => setSelectedIds([element.id])}
+							/>
+						) : element.type === "grouping" ? (
+							<Grouping
+								key={element.id}
+								element={element}
+								onDragStart={handleDragStart}
+								onDragEnd={handleDragEnd}
+								rectRefs={rectRefs}
+								onUpdateElement={handleUpdateElement}
+							/>
 						) :
 							null
 					)}
@@ -836,6 +925,7 @@ const Board = observer(() => {
 					onColorChange={handleColorChange}
 					onDelete={handleDelete}
 					showColorPicker={showColorPicker}
+					showDelete={showDelete}
 					onClose={() => setShowMenu(false)}
 				/>
 			)}

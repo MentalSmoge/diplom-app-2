@@ -6,7 +6,8 @@ export const RectangleElement = ({
     element,
     onDragStart,
     onDragEnd,
-    rectRefs
+    rectRefs,
+    draggable = true
 }) => {
     return (
         <Rect
@@ -17,7 +18,7 @@ export const RectangleElement = ({
             fill={element.fill}
             height={element.height}
             width={element.width}
-            draggable
+            draggable={draggable}
             shadowColor="black"
             shadowBlur={10}
             shadowOpacity={0.6}

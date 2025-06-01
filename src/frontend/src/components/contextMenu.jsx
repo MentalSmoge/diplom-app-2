@@ -9,6 +9,7 @@ const ContextMenu = ({
     onColorChange,
     onDelete,
     showColorPicker,
+    showDelete,
     onClose
 }) => {
     const handleClick = (e) => {
@@ -32,8 +33,7 @@ const ContextMenu = ({
             }}
             onClick={handleClick}
         >
-            {
-                showColorPicker &&
+            {showColorPicker &&
                 <CirclePicker
                     color={selectedColor}
                     onChangeComplete={onColorChange}
@@ -48,8 +48,7 @@ const ContextMenu = ({
                         '#B5B5B5', '#FD927B', '#AFFF9C', '#9FE2F8', '#FFF080'
                     ]}
                 />}
-            {
-                showColorPicker &&
+            {showColorPicker &&
                 <ChromePicker
                     color={selectedColor}
                     onChangeComplete={onColorChange}
@@ -58,20 +57,21 @@ const ContextMenu = ({
                     style={{ boxShadow: 'none' }}
                     width={'200px'}
                 />}
-
-            <button
-                style={{
-                    padding: '8px',
-                    backgroundColor: '#ff4444',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                }}
-                onClick={onDelete}
-            >
-                Delete
-            </button>
+            {showDelete &&
+                <button
+                    style={{
+                        padding: '8px',
+                        backgroundColor: '#ff4444',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                    }}
+                    onClick={onDelete}
+                >
+                    Delete
+                </button>
+            }
         </div>
     );
 };

@@ -69,7 +69,8 @@ const EditableText = ({
     onDragStart,
     onDragEnd,
     rectRefs,
-    onUpdateElement
+    onUpdateElement,
+    draggable = true
 }) => {
     const [text, setText] = useState(element.text);
     const [isEditing, setIsEditing] = useState(false);
@@ -115,7 +116,7 @@ const EditableText = ({
         // <Stage width={window.innerWidth} height={window.innerHeight}>
         <>
             <Text
-                draggable
+                draggable={draggable}
                 fill={element.fill}
                 onDragStart={onDragStart}
                 onDragEnd={onDragEnd}
