@@ -773,8 +773,36 @@ const Board = observer(({ title }) => {
 		console.log("handleMouseUp", tempElement)
 
 		if (selectedTool === 'brush') {
+			let minX = Infinity;
+			let maxX = -Infinity;
+			let minY = Infinity;
+			let maxY = -Infinity;
+
+			// Проходим по всем точкам и находим min/max
+			for (let i = 0; i < tempElement.points.length; i += 2) {
+				const x = tempElement.points[i];
+				const y = tempElement.points[i + 1];
+
+				if (x < minX) minX = x;
+				if (x > maxX) maxX = x;
+				if (y < minY) minY = y;
+				if (y > maxY) maxY = y;
+			}
+
+			// Рассчитываем параметры
+			const x = minX;
+			const y = minY;
+			const width = maxX - minX;
+			const height = maxY - minY;
+
 			if (tempElement.points.length > 2) {
-				handleCreateElement(tempElement);
+				handleCreateElement({
+					...tempElement,
+					x: x,
+					y: y,
+					width: width,
+					height: height
+				});
 			}
 			setTempElement(null);
 		}
