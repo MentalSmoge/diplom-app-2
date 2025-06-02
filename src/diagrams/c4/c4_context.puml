@@ -1,0 +1,13 @@
+@startuml C4_Elements
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(personAlias, "Пользователь", "Разработчик игр")
+System(systemAlias, "Система разработки дизайна игр", "Построение дизайнов игр")
+' System_Ext(systemPayment, "Система оплаты")
+System_Ext(systemNotification, "Система уведомлений")
+System_Ext(systemAuth, "Система аутентификации")
+Rel(personAlias, systemAlias, "Взаимодействует с системой", "Websocket, HTTPS, JSON")
+' Rel_L(systemAlias, systemPayment, "Запрос на обработку платежа")
+Rel_L(systemAlias, systemNotification, "Передает информацию о приглашении в проект", "HTTPS, JSON")
+BiRel_D(systemAlias, systemAuth, "Аутентифицирует пользователя", "OAuth 2.0")
+@enduml

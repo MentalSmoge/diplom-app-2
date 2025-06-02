@@ -1,0 +1,50 @@
+@startuml components
+[Frontend] as front
+package "Backend" {
+    [RabbitMQ (Брокер)] as brocker
+    [Auth] as auth <<Microservice>>
+    ' [API Gateway] as api
+    [Editor] as editor <<Microservice>>
+    [Users] as users <<Microservice>>
+    [Invitations] as invite <<Microservice>>
+    ' Interface "Input event" as input
+    ' Interface "Emit event" as output
+    Interface "Authorize" as authorize
+    Interface "HTTP request" as request
+    Interface "Websocket\nconnection" as websocket
+    Interface "Project" as projects
+    Interface "User" as user
+    ' Interface "User Info" as users_info
+}
+
+' brocker -left- input
+' brocker -right- output
+users - user
+' user - users_info
+auth - authorize
+editor -up- websocket
+editor -- projects
+users - request
+invite - request
+users --( authorize
+' request -down- api
+' api -left-( authorize
+' api --( projects
+' api --( users_info
+invite -left-( projects
+users -right-( projects
+invite --( user
+editor --( user
+' editor --( input
+' auth --( input
+' user --( input
+' invite --( input
+
+' editor --( output
+' auth --( output
+' user --( output
+' invite --( output
+
+front --( request
+front --( websocket
+@enduml

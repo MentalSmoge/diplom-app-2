@@ -1,0 +1,82 @@
+@startuml ElementService_Class_Diagram
+
+' ===== Domain Layer =====
+package "Domain Layer" {
+interface Element {
+    + id: string
+    + type: string
+    + boardId: string
+}
+
+interface ElementRepository {
+    + initialize(): Promise<void>
+    + loadInitialState(): Promise<Element[]>
+    + saveElement(element: Element): Promise<void>
+    + deleteElement(elementId: string): Promise<void>
+}
+}
+
+' ===== Application Layer =====
+package "Application Layer" {
+class ElementService {
+    - elements: Element[]
+    - elementRepository: ElementRepository
+    + initialize(): Promise<void>
+    + getElements(): Element[]
+    + getElementsByBoard(boardId: string): Promise<Element[]>
+    + createElement(element: Element): Promise<void>
+    + updateElement(element: Element): Promise<void>
+    + deleteElement(elementId: string): Promise<void>
+}
+}
+' ===== Infrastructure Layer =====
+package "Infrastructure Layer" {
+class ElementRepositoryImplementation {
+    - connection: r.Connection
+    + initialize(): Promise<void>
+    + loadInitialState(): Promise<Element[]>
+    + saveElement(element: Element): Promise<void>
+    + deleteElement(elementId: string): Promise<void>
+}
+}
+
+' ===== Framework Layer =====
+
+package "Framework Layer" {
+class Server {
+    - app: express.Application
+    - io: socket.io.Server
+    - port: number
+    + startUsersServer(): Promise<void>
+    + setupMiddlewares(): void
+    + setupRoutes(): void
+}
+
+class WebSocketController {
+    - io: Server
+    - elementService: ElementService
+    - boardService: BoardService
+    + setupHandlers(): void
+}
+}
+' ===== Связи и зависимости =====
+ElementRepository <|.. ElementRepositoryImplementation
+ElementService o-- ElementRepositoryImplementation
+ElementRepositoryImplementation ..> Element
+ElementService ..> ElementRepository
+ElementRepository ..> Element
+ElementService ..> Element
+WebSocketController o-- ElementService
+Server o-- WebSocketController
+
+' ===== Стили для наглядности =====
+skinparam interface {
+    backgroundColor #ffdddd
+    borderColor #ff9999
+}
+skinparam class {
+    backgroundColor #ddddff
+    borderColor #9999ff
+}
+
+@enduml

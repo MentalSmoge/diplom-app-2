@@ -1,0 +1,30 @@
+@startuml C4_Elements
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Person(personAlias, "Пользователь", "Разработчик игр")
+
+System_Boundary(c3, "Веб приложение", $descr="То, через что пользователь будет взаимодействовать с системой") {
+  Component(state, "StateManagers", "Mobx, Typescript")
+  ' Component(controller, "DbController", "Typescript")
+  Component(ui, "UiManager", "React.js, CSS")
+  Component(projects, "ProjectsManager", "Typescript, ...")
+  Component(field, "FieldManager", "Typescript, ...")
+  Component(user, "UserManager", "Typescript, ...")
+}
+Container(editor, "Сервис редактора", "Node.js", $descr="")
+Container(auth, "Сервис авторизации", "Node.js", $descr="")
+Container(api, "Сервис API", "Node.js", $descr="")
+Rel(projects, api, "Запрос на отправку приглашения пользователю", "HTTPS, JSON")
+Rel(field, editor, "Обновление информации в редакторе в реальном времени", "Websocket, HTTPS, JSON")
+Rel(user, auth, "Запрашивает авторизацию, регистрирует пользователя", "HTTPS, JSON")
+' System_Ext(systemPayment, "Система оплаты")
+Rel(personAlias, ui, "Взаимодействует с системой", "Websocket, HTTPS, JSON")
+BiRel(ui, state, "", "")
+' BiRel(state, controller, "", "")
+BiRel(state, field, "", "")
+BiRel(state, projects, "", "")
+BiRel(state, user, "", "")
+' Rel_L(c1, systemPayment, "Запрос на обработку платежа")
+@enduml

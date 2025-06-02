@@ -1,0 +1,25 @@
+@startuml C4_Elements
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(personAlias, "Пользователь", "Разработчик игр")
+
+System_Boundary(c1, "Система разработки дизайна игр", $descr="Построение дизайнов игр") {
+  Container(webApp, "Веб-приложение", "React.js", $descr="То, через что пользователь будет взаимодействовать с системой")
+  Container(editor, "Бэкенд", "Express.js", $descr="Вся функциональность серверной составляющей веб-приложения")
+
+  ContainerDb(db, "База данных", "PostgreSQL", "Содержит информацию о пользователях")
+  ContainerDb(db2, "База данных", "RethinkDB", "Содержит информацию о проектах пользователей")
+}
+' System_Ext(systemPayment, "Система оплаты")
+' System_Ext(systemNotification, "Система уведомлений")
+System_Ext(systemMail, "Почта")
+BiRel_D(personAlias, webApp, "Взаимодействует с системой", "Websocket, HTTPS")
+BiRel_R(webApp, editor, "Обновление информации о редакторе", "Websocket, HTTPS")
+BiRel(editor, db2, "Чтение и запись данных об элементах на досках в БД", "HTTPS")
+BiRel(editor, db, "Чтение и запись пользовательских данных", "HTTPS")
+' Rel(webApp, api, "Запрос на отправку приглашения пользователю", "HTTPS")
+' Rel_L(c1, systemPayment, "Запрос на обработку платежа")
+' Rel_L(api, systemNotification, "Передает информацию о приглашении в проект", "HTTPS")
+' BiRel(auth, systemAuth, "Аутентифицирует пользователя", "OAuth 2.0")
+BiRel_R(editor, systemMail, "Регистрация пользователя и сброс пароля", "")
+@enduml

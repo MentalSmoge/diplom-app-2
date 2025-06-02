@@ -1,0 +1,26 @@
+@startuml board
+autonumber
+participant "websocketController" as wc 
+actor "Пользователь" as o
+participant "Браузер" as f
+participant "boardComponent" as bc
+participant "boardStore" as bs 
+
+group 3. Сторонние изменения на доске
+wc ->> bc : Извещает подписанных\nна данную доску пользователей\nоб изменениях
+activate bc
+bc ->> bs : Передает новое\nлокальное состояние доски
+activate bs
+bs -> bs : Вносит изменения\nлокально
+bs ->> bc : Компонент извещается\nоб изменениях
+deactivate bs
+bc ->> f : Изменяет страницу
+deactivate bc
+
+activate f
+f ->> o : Показывает обновленную\nстраницу
+deactivate f
+
+end
+
+@enduml

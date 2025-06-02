@@ -1,0 +1,67 @@
+@startuml board
+autonumber
+actor "Пользователь" as u
+participant "Frontend" as f
+participant "boardComponent" as bc
+participant "boardStore" as bs 
+participant "websocketController" as wc 
+participant "elementService" as es
+actor "Остальные пользователи\nна доске" as o
+group 1. Пользователь заходит на доску
+u -> f : Переходит на доску
+activate f
+f -> bc : Извещает компонент\nо переходе на доску
+activate bc
+alt Пользователь уже был на другой доске
+bc -> bc : Отписывается от сигналов\nна предыдущей доске
+end
+bc -> wc : Подписывается на сигналы новой доски
+activate wc
+wc -->> bc : Подписался
+deactivate wc
+bc ->> wc : Посылает сигнал connection
+deactivate bc
+activate wc
+wc -> es : Запрашивает состояние\nтекущей доски
+activate es
+es -->> wc : Возвращает состояние\nтекущей доски
+deactivate es
+wc ->> bc : Посылает состояние текущей доски
+deactivate wc
+activate bc
+bc ->> bs : Сохраняет состояние текущей доски
+activate bs
+bs -> bs : Сохраняет
+deactivate bs
+bc -->> f : Изменяет страницу
+deactivate bc
+f -->> u : Показывает обновленную\nстраницу
+deactivate f
+end
+group 2. Пользователь изменяет элементы на доске
+u -> f : Вносит изменение\nна доске
+activate f
+f -> bs : Посылает изменения пользователя
+activate bs
+bs -> bs : Вносит изменения\nлокально
+bs ->> bc : Компонент извещается\nоб изменениях
+deactivate bs
+activate bc
+bc -->> f : Изменяет страницу
+bc ->> es : Посылает изменения
+activate es
+es -> es : Применяет изменения
+deactivate es
+bc ->> wc : Посылает сигнал с изменениями
+deactivate bc
+activate wc
+wc ->> o : Извещает подписанных\nна данную доску пользователей\nоб изменениях
+deactivate wc
+activate o
+o -> o : Вносит изменения\nу себя
+deactivate o
+f -->> u : Показывает обновленную\nстраницу
+deactivate f
+end
+
+@enduml

@@ -1,0 +1,27 @@
+@startuml business_classes
+left to right direction
+  class user{
+  }
+  class projects{
+  }
+  class comments{
+  }
+
+  class boards{
+  }
+  class board_elements{
+  }
+  class invitation{
+  }
+  class GDD
+  user "2" <-- "0..*" invitation
+  user "1..*" <.. "0..*" projects
+  user "1" <-- "0..*" comments
+  projects "1" *-- "0..*" boards
+  comments "0..*" --* "1" boards
+  invitation "0..*" --> "1" projects
+  boards "1" *-- "0..*" board_elements
+  boards "1" <.. "0..*" GDD
+
+
+@enduml

@@ -1,0 +1,37 @@
+@startuml accept_invitation_system
+autonumber
+actor "Пользователь" as user
+participant "Frontend" as front
+participant "Invitaiton Service" as notif
+participant "Project Service" as proj
+database "База данных" as pdb
+
+group 13. Принять приглашение на доступ к проекту
+user -> front : Открывает раздел "Входящие приглашения"
+front -> notif : Запрашивает список приглашений
+notif -> pdb : Ищет приглашения для пользователя
+pdb -->> notif : Возвращает список
+notif -->> front : Отдает приглашения + метаданные проектов
+front -->> user : Отображает список приглашений
+alt Выбирает "Принять"
+user -> front : Выбирает "Принять" для проекта X
+front -> notif : Отправляет запрос на добавление
+notif -> proj : Отправляет запрос на добавление
+
+proj -> pdb : Добавляет пользователя в проект
+pdb -->> proj : Подтверждает обновление
+proj -->> notif : Возвращает успех операции
+notif -> pdb : Помечает приглашение как принятое
+pdb -->> notif : Подтверждает
+notif -->> front : Уведомляет об успехе
+front -->> user : Обновляет интерфейс (добавляет проект)\nПоказывает "Доступ предоставлен"
+else Выбирает "Отказать"
+user -> front : Выбирает "Отказать" для проекта X
+front -> notif : Отправляет запрос на отказ
+notif -> pdb : Помечает приглашение как отказанное
+pdb -->> notif : Подтверждает
+notif -->> front : Уведомляет об успехе
+front -->> user : Обновляет интерфейс\nПоказывает "Приглашение отклонено"
+end
+end
+@enduml

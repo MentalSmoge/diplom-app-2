@@ -1,0 +1,30 @@
+@startuml BoardCreationSequence
+
+participant Frontend as Browser
+participant "boardRoutes" as Routes
+participant "BoardService" as Service
+participant "ProjectService" as Project
+participant "BoardRepository" as Repository
+database "PostgreSQL" as DB
+
+Browser -> Routes: POST /boards {title, project_id, user_id}
+Routes -> Service: createBoard(command)
+
+Service -> Project: getUserRoleInProject(user_id, project_id)
+Project --> Service: Возвращает userRole в данном проекте
+
+alt Нельзя создавать доски в проекте (userRole < 3)
+    Service --> Routes: Ошибка "Нет прав"
+    Routes --> Browser: 403 Forbidden
+else Есть доступ
+    Service -> Service: new Board(title, project_id)
+    Service -> Repository: addBoard(board)
+    Repository -> DB: INSERT INTO boards(...)
+    DB --> Repository: id созданной доски
+    Repository --> Service: id созданной доски
+    Service --> Service: board.id = id
+    Service --> Routes: Возращает созданную\nдоску
+    Routes --> Browser: 201 Created\n+ информация о доске
+end
+
+@enduml

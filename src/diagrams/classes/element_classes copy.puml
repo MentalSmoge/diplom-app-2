@@ -1,0 +1,38 @@
+@startuml Onion_Architecture
+allowmixing
+package "Domain" {
+    interface Element
+    interface ElementRepository
+}
+
+package "Application" {
+    class ElementService
+    class BoardService
+}
+
+package "Infrastructure" {
+    class RethinkDBElementRepository
+    class PostgreSQLUserRepository
+}
+
+package "Framework" {
+    class WebSocketController
+    class ExpressRouter
+}
+
+package "External" {
+    frame "RethinkDB" as db1
+    frame "PostgreSQL" as db2
+    frame "Socket.IO" as io
+}
+
+Domain --> Application : Зависит
+Application --> Infrastructure : Зависит
+Framework --> Application : Зависит
+Infrastructure --> External : Зависит
+Framework --> External : Зависит
+
+ElementService .up.|> ElementRepository
+RethinkDBElementRepository .up.|> ElementRepository
+
+@enduml

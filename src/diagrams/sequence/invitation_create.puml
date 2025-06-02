@@ -1,0 +1,22 @@
+@startuml create_invitation
+autonumber
+actor "Пользователь" as d
+participant "Frontend" as f
+participant "Invitation Service" as i
+database "База данных" as db
+' participant "Notification Service" as n
+' database "Notification DB" as n_db
+
+group 9. Создать ссылку на просмотр проекта
+d -> f : Нажимает "Создать ссылку\nна доступ к проекту"
+f -->> d : Выводит варианты ролей\n(Редактор, комментатор, читатель)
+d -> f : Выбирает нужную роль
+f -> i : Запрашивает создание ссылки
+i -> i : Генерирует уникальную ссылку
+i -> db : Сохраняет ссылку
+db -->> i : Подтверждает сохранение
+i -->> f : Возвращает ссылку-приглашение
+f -->> d : Отображает ссылку-приглашение\nи возможность скопировать её
+
+end
+@enduml

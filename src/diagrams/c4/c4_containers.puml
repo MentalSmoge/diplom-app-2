@@ -1,0 +1,25 @@
+@startuml C4_Elements
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(personAlias, "Пользователь", "Разработчик игр")
+
+System_Boundary(c1, "Система разработки дизайна игр", $descr="Построение дизайнов игр") {
+  Container(webApp, "Веб-приложение", "React.js", $descr="То, через что пользователь будет взаимодействовать с системой")
+  Container(editor, "Сервис редактора", "Node.js", $descr="Вся функциональность серверной составляющей редактора веб-приложения")
+  Container(auth, "Сервис авторизации", "Node.js", $descr="")
+  Container(api, "Сервис API", "Node.js", $descr="")
+  ContainerDb(db, "База данных", "SQLite", "Содержит информацию о проектах пользователей, информацию о пользователях")
+}
+' System_Ext(systemPayment, "Система оплаты")
+System_Ext(systemNotification, "Система уведомлений")
+System_Ext(systemAuth, "Система аутентификации")
+Rel(personAlias, webApp, "Взаимодействует с системой", "Websocket, HTTPS, JSON")
+Rel(webApp, auth, "Запрашивает авторизацию, регистрирует пользователя", "HTTPS, JSON")
+BiRel(auth, db, "Чтение и запись пользовательских данных и аудит-информации В БД", "Websocket, HTTPS, JSON")
+Rel(webApp, editor, "Обновление информации в редакторе в реальном времени", "Websocket, HTTPS, JSON")
+BiRel(editor, db, "Чтение и запись В БД", "Websocket, HTTPS, JSON")
+Rel(webApp, api, "Запрос на отправку приглашения пользователю", "HTTPS, JSON")
+' Rel_L(c1, systemPayment, "Запрос на обработку платежа")
+Rel_L(api, systemNotification, "Передает информацию о приглашении в проект", "HTTPS, JSON")
+BiRel(auth, systemAuth, "Аутентифицирует пользователя", "OAuth 2.0")
+@enduml

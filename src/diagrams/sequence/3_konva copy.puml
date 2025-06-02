@@ -1,0 +1,31 @@
+@startuml Rectangle Rendering Sequence
+
+Participant Браузер as User
+participant "Board.jsx" as Board
+participant "boardStore" as Store
+participant "RectangleElement" as RectComponent
+participant "TextElement" as TextComponent
+participant "Konva Layer" as Layer
+participant "Konva Stage" as Stage
+group Обновление элементов
+    User -> Board: Перемещает/изменяет\n элемент/ы
+    Board -> Store: updateElement(updatedRect)
+    Store --> Board: Обновляет elements[]
+    Board -> Board: Обновляет элементы\nпо одному
+loop Для каждого элемента
+alt Элемент типа "rect"
+    Board -> RectComponent: Передает новые атрибуты\nиз изменившегося element
+    RectComponent -> RectComponent: Обновляет атрибуты
+    RectComponent --> Board: Возвращает обновленный\nэлемент
+else Элемент типа "text"
+    Board -> TextComponent: Передает новые атрибуты\nиз изменившегося element
+    TextComponent -> TextComponent: Обновляет атрибуты
+    TextComponent --> Board: Возвращает обновленный\nэлемент
+end
+    Board -> Layer: Изменяет элемент в Layer
+    Layer -> Stage: Рендерит Layer на Stage
+    end
+    Stage --> User: Показывает получившуюся картинку в браузере
+end
+
+@enduml

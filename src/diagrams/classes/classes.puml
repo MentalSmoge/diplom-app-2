@@ -1,0 +1,55 @@
+@startuml business_classes
+left to right direction
+package "База данных" <<Database>> {
+  class users{
+    id: int
+    username: string
+    email: string
+    password: string
+    created_at: date
+  }
+  class users_projects{
+    id: int
+    user_id: int
+    project_id: int
+    type: int
+  }
+  class projects{
+    id: int
+    title: string
+    description: string
+    created_at: date
+    updated_at: date
+  }
+
+  class boards{
+    id: int
+    title: string
+    description: string
+    background_color: string
+    link_id_projects: int
+  }
+  class board_elements{
+    id: int
+    board_id: int
+    type: int
+    value: string
+  }
+  class invitation{
+    id: int
+    owner_user_id: int
+    invited_user_id: int
+    project_id: int
+    active: bool
+    created_at: date
+    expire_at: date
+  }
+  users "1" -- "0.." users_projects
+  users_projects "0.." -- "1" projects
+  users "1" -- "0.." invitation
+  projects "1" -- "0.." boards
+  invitation "0.." -- "1" projects
+  boards "1" -- "0.." board_elements
+}
+
+@enduml

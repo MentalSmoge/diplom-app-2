@@ -1,0 +1,43 @@
+@startuml Rectangle Rendering Sequence
+
+Participant Браузер as User
+participant "Board.jsx" as Board
+participant "boardStore" as Store
+participant "RectangleElement" as RectComponent
+participant "TextElement" as TextComponent
+participant "Konva Rect" as KonvaRect
+participant "Konva Text" as KonvaText
+participant "Konva Layer" as Layer
+participant "Konva Stage" as Stage
+
+group Создание элемента
+User -> Board: Добавляет\nэлемент
+Board -> Store: addElement(newElement)
+Store --> Board: Обновляет elements[]
+end
+group Отрисовка элементов
+User -> Board: Заходит на доску
+Board -> Store: Запрашивает все элементы
+Store --> Board: Возвращает elements[]
+Board -> Board: Отрисовывает элементы\nпо одному
+loop Для каждого элемента
+alt Элемент типа "rect"
+Board -> RectComponent: Запрашивает создание Rect\nс атрибутами из element
+RectComponent -> KonvaRect: Запрашивает основу для элемента
+KonvaRect --> RectComponent: Возвращает основу\nэлемента из библиотеки Konva
+RectComponent -> RectComponent: Создаёт элемент
+RectComponent --> Board: Возвращает элемент
+else Элемент типа "text" 
+Board -> TextComponent: Запрашивает создание Text\nс атрибутами из element
+TextComponent -> KonvaText: Запрашивает основу для элемента
+KonvaText --> TextComponent: Возвращает основу\nэлемента из библиотеки Konva
+TextComponent -> TextComponent: Создаёт элемент
+RectComponent --> Board: Возвращает элемент
+end
+Board -> Layer: Добавляет элемент в Layer
+Layer -> Stage: Рендерит Layer на Stage
+end
+Stage --> User: Показывает получившуюся картинку в браузере
+
+end
+@enduml

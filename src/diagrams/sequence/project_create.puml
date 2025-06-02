@@ -1,0 +1,24 @@
+@startuml create_project
+autonumber
+actor "Пользователь" as d
+participant "Frontend" as f
+participant "Project Service" as p
+database "База данных" as db
+participant "User Service" as u
+database "User DB" as db
+
+group 6. Создать проект
+d -> f : Нажимает "Создать проект"
+f -> p : Отправляет запрос на создание проекта
+p -> p : Создает проект
+p -> u : Запрашивает данные пользователя
+u -> db : Запрашивает данные пользователя
+db -->> u : Отправляет данные пользователя
+u -->> p : Отправляет данные пользователя
+p -> p : Добавляет пользователя\nв проект
+p -> db : Сохраняет проект
+db -->> p : Подтверждает сохранение
+p -->> f : Возвращает созданный проект
+f -->> d : Отображает новый проект
+end
+@enduml

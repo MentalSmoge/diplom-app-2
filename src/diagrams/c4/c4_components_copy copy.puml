@@ -1,0 +1,36 @@
+@startuml C4_Elements
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+AddElementTag("v1.0", $fontColor="#black", $bgColor="#DCDCDC")
+Container(webApp, "Веб-приложение", "React.js", $descr="То, через что пользователь будет взаимодействовать с системой", $tags="v1.0")
+Container_Boundary(c1, "Бэкенд", $descr="Построение дизайнов игр") {
+  Container(editor, "Сервис редактора", "Express.js", $descr="Вся функциональность серверной составляющей редактора веб-приложения", $tags="v1.0")
+  Container(users, "Сервис пользователей", "Express.js", $descr="Управление пользовательскими данными", $tags="v1.0")
+  Container(auth, "Сервис авторизации", "Express.js", $descr="", $tags="v1.0")
+  ' Container(api, "Сервис API", "Express.js", $descr="")
+  Container(invite, "Сервис приглашений", "Express.js", $descr="", $tags="v1.0")
+  Container(project, "Сервис проектов", "Express.js", $descr="", $tags="v1.0")
+  Container(mail, "Сервис почты", "Express.js", $descr="", $tags="v1.0") 
+}
+ContainerDb(db, "База данных", "PostgreSQL", "Содержит информацию о пользователях и их проектах", $tags="v1.0")
+' ContainerDb(db2, "База данных", "RethinkDB", "Содержит информацию о проектах пользователей")
+' System_Ext(systemPayment, "Система оплаты")
+' System_Ext(systemNotification, "Система уведомлений")
+System_Ext(systemMail, "Почта")
+BiRel(webApp, auth, "Запрашивает авторизацию, регистрирует пользователя", "HTTPS")
+BiRel(auth, db, "Чтение и запись пользовательских данных и аудит-информации В БД", "HTTPS")
+BiRel(users, db, "Чтение и запись пользовательских данных", "HTTPS")
+BiRel(invite, db, "Чтение и запись приглашений в БД", "HTTPS")
+BiRel(webApp, editor, "Обновление информации в редакторе в реальном времени", "Websocket, HTTPS")
+BiRel(editor, db, "Чтение и запись данных об элементах на досках в БД", "Websocket, HTTPS")
+BiRel(project, db, "Чтение и запись данных о проектах в БД", "HTTPS")
+BiRel(webApp, project, "Информация о проектах", "HTTPS")
+BiRel(webApp, invite, "Информация о приглашениях в проекты", "HTTPS")
+BiRel(webApp, users, "Информация о пользователях", "HTTPS")
+' Rel(webApp, api, "Запрос на отправку приглашения пользователю", "HTTPS")
+' Rel_L(c1, systemPayment, "Запрос на обработку платежа")
+' Rel_L(api, systemNotification, "Передает информацию о приглашении в проект", "HTTPS")
+' BiRel(auth, systemAuth, "Аутентифицирует пользователя", "OAuth 2.0")
+BiRel_L(auth, mail, "Запрашивает письмо по адресу", "HTTPS")
+BiRel(mail, systemMail, "Регистрация пользователя и сброс пароля", "")
+@enduml

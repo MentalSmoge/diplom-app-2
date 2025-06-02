@@ -1,0 +1,36 @@
+@startuml create_board
+autonumber
+actor "Пользователь" as d
+participant "Frontend" as f
+participant "Board Service" as b
+' database "Board DB" as project_db
+participant "Project Service" as p
+' database "Project DB" as project_db
+participant "User Service" as u
+database "База данных" as project_db
+
+group 7. Создать доску
+d -> f : Нажимает "Создать доску" в проекте
+f -> b : Отправляет запрос на создание доски
+
+b -> u : Запрашивает данные пользователя
+u -> project_db : Запрашивает данные пользователя
+project_db -->> u : Возвращает данные пользователя
+u -->> b : Возвращает данные пользователя
+b -> p : Запрашивает права пользователя
+p -> project_db : Проверяет роль пользователя
+project_db -->> p : Возвращает роль пользователя
+alt есть права на создание
+    p -->> b : Подтверждает права
+    b -> b : Создает доску
+    b -> project_db : Сохраняет доску
+    project_db -->> b : Подтверждает сохранение
+    b -->> f : Возвращает созданную доску
+    f -->> d : Отображает новую доску
+else нет прав
+    p -->> b : Отказывает в доступе
+    b -->> f : Возвращает ошибку прав
+    f -->> d : Показывает сообщение об ошибке
+end
+end
+@enduml

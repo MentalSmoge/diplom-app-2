@@ -1,0 +1,48 @@
+@startuml DeploymentDiagram
+
+node "VPS Server" as server {
+    artifact "Frontend" as frontend {
+    [React приложение]
+    ' [Vite]
+    }
+
+    artifact "Backend" as backend {
+    [Express.js]
+    [Socket.io]
+    ' [PostgreSQL Client]
+    }
+
+    database "PostgreSQL" as postgres {
+    [Users Table]
+    [Projects Table]
+    [Boards Table]
+    [Elements Table]
+    [Invitation Table]
+    [Comments Table]
+    [Project accesses Table]
+    [Access link Table]
+    }
+}
+
+node Браузер as browser
+    
+
+browser --> frontend : HTTP/HTTPS
+frontend --> [Express.js] : API Запросы\nREST
+frontend --> [Socket.io] : API Запросы\nWebsocket
+backend -up-> postgres : SQL Запросы
+
+' server .up. frontend
+' server .up. backend
+' server .up. postgres
+
+
+' note top of postgres
+'   Database Schema:
+'   - users
+'   - projects
+'   - boards
+'   - elements
+' end note
+
+@enduml

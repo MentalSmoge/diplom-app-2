@@ -1,0 +1,28 @@
+@startuml C4_Elements
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+
+Container(webApp, "Веб-приложение", "React.js", $descr="То, через что пользователь будет взаимодействовать с системой")
+System_Boundary(c3, "Сервис авторизации", $descr="") {
+  ' Component(controller, "DbController", "Typescript")
+  Component(authorizationManager, "АuthorizationManager", "Typescript, ...")
+  Component(authenticationManager, "AuthenticationManager", "Typescript, ...")
+  Component(audit, "Audit", "Typescript, ...")
+  Component(data, "DataStore", "Mobx, Typescript")
+}
+System_Ext(systemAuth, "Система аутентификации")
+ContainerDb(db, "База данных", "SQLite", "Содержит информацию о проектах пользователей, информацию о пользователях")
+
+BiRel(authorizationManager, data, "", "")
+BiRel(authorizationManager, authenticationManager, "", "")
+BiRel(authenticationManager, data, "", "")
+Rel(data, audit, "", "")
+Rel_D(webApp, authorizationManager, "Запрашивает авторизацию, регистрирует пользователя", "HTTPS, JSON")
+BiRel_D(authenticationManager, systemAuth, "Аутентифицирует пользователя", "OAuth 2.0")
+BiRel(data, db, "Чтение и запись пользовательских данных В БД", "Websocket, HTTPS, JSON")
+BiRel(audit, db, "Чтение и запись аудит-информации В БД", "Websocket, HTTPS, JSON")
+' System_Ext(systemPayment, "Система оплаты")
+' Rel_L(c1, systemPayment, "Запрос на обработку платежа")
+@enduml

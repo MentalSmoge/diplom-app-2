@@ -1,0 +1,53 @@
+@startuml sas
+left to right direction
+legend top left
+    |Цвет| Приоритет |
+    |<#palegreen>| Must|
+    |<#Khaki>| Should |
+    |<#LightSkyBlue>| Could |
+    |<#LightCoral>| Won't |
+endlegend
+skinparam defaultFontSize 15
+actor Читатель as user
+actor Редактор as designer
+actor "Комментатор" as developer
+' usecase (Зайти в свой профиль) as login #palegreen
+usecase (Создать проект) as create_project #palegreen
+usecase (Создать доску) as create_board #palegreen
+usecase (Пригласить пользователя в проект) as create_invitation #palegreen
+usecase (Создать ссылку на просмотр доски) as create_link #LightSkyBlue
+' usecase (Отправить приглашение внутри системы) as send_via_system #LightSkyBlue
+' usecase (Отправить приглашение через Telegram) as send_via_telegram #LightCoral
+' usecase (Отправить приглашение внутри системы) as send_via_system #LightSkyBlue
+usecase (Редактировать содержимое доски\nв проекте) as edit_board #palegreen
+usecase (Группировать элементы доски) as group_in_board #palegreen
+usecase (Отменять изменения) as rollback #Khaki
+usecase (Экспортировать данные\nв GDD) as export_gdd #palegreen
+' usecase (Экспортировать в .doc документе) as export_as_doc #LightSkyBlue
+' usecase (Экспортировать в .md документе) as export_as_md #palegreen
+usecase (Просматривать доску) as readonly #palegreen
+usecase (Оставить комментарий на доске в проекте) as comment #LightCoral
+usecase (CRUD элементов на доске) as crud_elements #palegreen
+usecase (Принять приглашение на доступ к проекту) as cool_invitation #palegreen
+developer -- cool_invitation
+designer -- cool_invitation
+developer -- comment
+designer -- comment
+designer --|> user
+developer --|> user
+designer -- create_project
+designer -- create_link
+' user -- login
+user -- readonly
+create_project <.. create_board : расширить
+designer -- create_invitation
+' create_invitation <.. send_via_telegram : расширить
+' create_invitation <.. send_via_system : расширить
+designer -- edit_board
+edit_board <.. group_in_board : расширить
+edit_board <.. rollback : расширить
+edit_board <.. crud_elements : расширить
+designer -- export_gdd
+' export_gdd ..> export_as_doc : включает
+' export_gdd ..> export_as_md : включает
+@enduml

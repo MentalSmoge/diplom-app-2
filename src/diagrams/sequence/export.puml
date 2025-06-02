@@ -1,0 +1,19 @@
+@startuml export
+autonumber
+actor "Пользователь" as user
+participant "Frontend" as frontend
+participant "Editor Service" as editor
+database "База данных" as db
+
+group 3. Экспортировать данные в GDD
+user -> frontend : Выбирает доску, формат, название и\nнажимает кнопку\n"Экспортировать"
+frontend -> editor : Запрашивает данные\nдля экспорта
+editor -> db : Запрашивает все\nэлементы доски
+db -> db : Собирает данные
+db -->> editor : Передает данные
+editor -> editor : Преобразует их в\nтекстовый вид\nвыбранного формата
+editor -->> frontend : Передаёт сформированный\nдокумент
+frontend -->> user : Начинает скачивание\nэкспортированного файла\nчерез браузер
+end
+
+@enduml
