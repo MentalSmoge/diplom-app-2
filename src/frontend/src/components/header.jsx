@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import { userStore } from '../stores/userStore';
 import { observer } from 'mobx-react';
 import '../styles.css';
+import { useNavigate } from 'react-router-dom';
 export const Header = observer(() => {
+    const navigate = useNavigate();
 
     const handleLogout = async () => {
         const response = await fetch('http://localhost:8080/logout', {
@@ -19,6 +21,7 @@ export const Header = observer(() => {
             <nav>
                 <ul style={{ display: 'flex', listStyle: 'none', gap: '1rem' }}>
                     <li><Link to="/projects">Projects</Link></li>
+                    <Link to="/invitations">Invitations</Link>
                     {/* <li><Link to="/boards">Board</Link></li> */}
                     {/* <li><Link to="/user">Users</Link></li> */}
                     {!userStore.isAuthenticated && <li><Link to="/login">Login</Link></li>}

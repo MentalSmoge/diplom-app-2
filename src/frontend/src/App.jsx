@@ -7,6 +7,7 @@ import { Register } from "./pages/register";
 import ProtectedRoute from "./components/protectedRoute";
 import { Header } from "./components/header";
 import Boards from "./pages/boards";
+import Invitations from "./pages/invitations";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
               <Route path="/project/:projectId" element={<Boards />} />
               <Route path="/boards" element={<Boards />} />
               <Route path="/boards/:boardId" element={<Board />} />
+              <Route path="/invitations" element={<Invitations />} />
             </Route>
           </Routes>
         </main>

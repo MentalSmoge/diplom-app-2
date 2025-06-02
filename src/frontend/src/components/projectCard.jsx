@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
-import './projectCard.css'; // Стили для компонента
+import './projectCard.css';
+import InviteModalStore from './modals/modal_invite/store_invite';
 
-const ProjectCard = ({ title, description, onOpen, onDelete }) => {
+const ProjectCard = ({ title, description, onOpen, onDelete, projectId }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
+    };
+
+    const handleInviteClick = () => {
+        InviteModalStore.setProjectId(projectId)
+        console.log(projectId)
+        InviteModalStore.openModal(projectId);
+        setIsMenuOpen(false);
     };
 
     return (
@@ -18,9 +26,11 @@ const ProjectCard = ({ title, description, onOpen, onDelete }) => {
                     </button>
                     {isMenuOpen && (
                         <div className="dropdown-menu">
+                            <button className="dropdown-item" onClick={handleInviteClick}>
+                                Пригласить
+                            </button>
                             <button className="dropdown-item">Редактировать</button>
                             <button className="dropdown-item">Копировать</button>
-                            <button className="dropdown-item">Поделиться</button>
                         </div>
                     )}
                 </div>

@@ -26,6 +26,7 @@ import { PostgreSQLProjectRepository } from "./infrastructure/projects_repositor
 import { ProjectService } from "./application/project_service";
 import { createImageRouter } from './framework/image_routes';
 import path from "path";
+import { InvitationRepositoryPostgres } from "./infrastructure/invitations_repository";
 
 const port = process.env.USERS_PORT || 8080;
 const app = express();
@@ -57,9 +58,10 @@ async function startUsersServer() {
     const userRepository = new PostgreSQLUserRepository(pool);
     const boardRepository = new PostgreSQLBoardRepository(pool);
     const projectRepository = new PostgreSQLProjectRepository(pool);
+    const invitationRepository = new InvitationRepositoryPostgres(pool);
     // Сервисы
     const userService = new UserService(userRepository, redisClient);
-    const projectService = new ProjectService(projectRepository, boardRepository);
+    const projectService = new ProjectService(projectRepository, boardRepository, invitationRepository, userRepository);
     const boardService = new BoardService(boardRepository, projectService);
     const authService = new AuthService(userRepository);
     const elementService = new ElementService(elementRepository_new);
@@ -69,7 +71,7 @@ async function startUsersServer() {
     app.use("/", createUserRouter(userService));
     app.use("/", createAuthRouter(userService, authService, boardService));
     app.use("/", createBoardRouter(boardService));
-    app.use("/", createProjectRouter(projectService));
+    app.use("/", createProjectRouter(projectService, userService));
     app.use('/', createImageRouter());
     app.use('/images', express.static(path.join(__dirname, '../public/images'), {
         setHeaders: (res) => {

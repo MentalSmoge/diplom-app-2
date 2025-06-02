@@ -1,8 +1,11 @@
 import * as express from "express";
 import { ProjectService } from "../application/project_service";
 import { CreateProjectCommand } from "../domain/project";
+import { CreateInvitationCommand, UpdateInvitationCommand } from "../domain/invitation";
+import { authenticateJWT } from "./auth/middleware";
+import { UserService } from "../application/user_service";
 
-export function createProjectRouter(projectService: ProjectService) {
+export function createProjectRouter(projectService: ProjectService, userService: UserService) {
     const router = express.Router();
 
     // Create a project
@@ -134,6 +137,60 @@ export function createProjectRouter(projectService: ProjectService) {
             }
         } catch (error) {
             res.status(500).json({ error: `${error}` });
+        }
+    });
+    router.post('/projects/:projectId/invite', authenticateJWT, async (req, res) => {
+        try {
+            const { email, role } = req.body;
+            //@ts-ignore
+            console.log(email, role, req.user)
+            const command: CreateInvitationCommand = {
+                //@ts-ignore
+                from_user_id: parseInt(req.user.userId),
+                to_user_email: email,
+                project_id: parseInt(req.params.projectId),
+                role: parseInt(role) || 1 // По умолчанию обычный участник
+            };
+            console.log("command", command)
+
+            const invitation = await projectService.createInvitation(command);
+            res.status(201).json(invitation);
+        } catch (error) {
+            //@ts-ignore
+            res.status(400).json({ error: error.message });
+        }
+    });
+
+    // Получить свои приглашения
+    router.get('/invitations', authenticateJWT, async (req, res) => {
+        try {
+            //@ts-ignore
+            const user = await userService.getUserById(req.user.userId)
+            console.log("invite", user)
+            //@ts-ignore
+            const invitations = await projectService.getUserInvitations(user.email);
+            console.log("invitations", invitations)
+            res.json(invitations);
+        } catch (error) {
+            //@ts-ignore
+            res.status(500).json({ error: error.message });
+        }
+    });
+
+    // Ответить на приглашение
+    router.post('/invitations/:invitationId/respond', authenticateJWT, async (req, res) => {
+        try {
+            const command: UpdateInvitationCommand = {
+                invitation_id: parseInt(req.params.invitationId),
+                status: req.body.status // 'accepted' или 'rejected'
+            };
+
+            //@ts-ignore
+            const project = await projectService.respondToInvitation(req.user.userId, command);
+            res.json(project);
+        } catch (error) {
+            //@ts-ignore
+            res.status(400).json({ error: error.message });
         }
     });
 

@@ -7,6 +7,7 @@ import AddProjectModalStore from '../components/modals/modal_addProject/store_ad
 import ProjectsStore from "./store_projects"
 import DeleteModal from "../components/modals/modal_delete"
 import DeleteModalStore from "../components/modals/modal_delete/DeleteModalStore"
+import InviteModal from "../components/modals/modal_invite";
 import { observer } from 'mobx-react-lite';
 
 import './ProjectsGrid.css';
@@ -45,6 +46,7 @@ function Projects() {
         <div className="projects-container">
             <AddProjectModal />
             <DeleteModal type="Project" />
+            <InviteModal />
             <div className="projects-header">
                 <h2 className="projects-title">Проекты</h2>
                 <button className="create-project-btn" onClick={() => handleCreateButton()}>
@@ -60,6 +62,7 @@ function Projects() {
                         onOpen={() => handleProjectButton(project.id)}
                         onDelete={() => handleDeleteButton(project.id)}
                         key={project.id}
+                        projectId={project.id}
                     />
                 ))}
             </div>
