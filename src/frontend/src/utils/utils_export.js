@@ -31,7 +31,7 @@ export function findGroups(objects, groupings = [], threshold = 0) {
     const naturalGroups = [];
     const visited = new Set();
 
-    const filteredObjects = objects.filter(obj => !groupings.includes(obj));
+    const filteredObjects = objects.filter(obj => !groupings.includes(obj) && !obj.exportAsText);
 
     for (const obj of filteredObjects) {
         if (visited.has(obj.id)) continue;
@@ -41,7 +41,9 @@ export function findGroups(objects, groupings = [], threshold = 0) {
 
         while (queue.length > 0) {
             const current = queue.shift();
+            console.log(current)
             if (visited.has(current.id)) continue;
+            // if (current.exportAsText) continue
 
             visited.add(current.id);
             currentGroup.push(current);
@@ -61,6 +63,11 @@ export function findGroups(objects, groupings = [], threshold = 0) {
             naturalGroups.push(currentGroup);
         }
     }
+
+    const filteredTexts = objects.filter(obj => !groupings.includes(obj) && obj.exportAsText);
+    const new_naturalGroups = [...naturalGroups, ...filteredTexts.map(item => [item])]
+    console.log(new_naturalGroups)
+
     console.log(naturalGroups)
 
     const resultGroups = [];
@@ -76,8 +83,8 @@ export function findGroups(objects, groupings = [], threshold = 0) {
         const elementsInside = [];
         const groupsToRemove = new Set();
 
-        for (let i = 0; i < naturalGroups.length; i++) {
-            const naturalGroup = naturalGroups[i];
+        for (let i = 0; i < new_naturalGroups.length; i++) {
+            const naturalGroup = new_naturalGroups[i];
             const hasOverlap = naturalGroup.some(el => {
                 const elBounds = getBoundingBox(el);
                 return (
@@ -89,16 +96,17 @@ export function findGroups(objects, groupings = [], threshold = 0) {
             });
 
             if (hasOverlap) {
-                elementsInside.push(naturalGroup); // Добавляем элементы, а не всю группу
-                groupsToRemove.add(i); // Помечаем группу для удаления
+                elementsInside.push(naturalGroup);
+                groupsToRemove.add(i);
             }
         }
+
         console.log(groupsToRemove)
         console.log(naturalGroups)
         Array.from(groupsToRemove).sort((a, b) => b - a).forEach(index => {
-            naturalGroups.splice(index, 1);
+            new_naturalGroups.splice(index, 1);
         });
-        console.log(naturalGroups)
+        console.log(new_naturalGroups)
 
         if (elementsInside.length > 0) {
             console.log(resultGroups)
@@ -111,7 +119,7 @@ export function findGroups(objects, groupings = [], threshold = 0) {
         }
     }
 
-    for (const naturalGroup of naturalGroups) {
+    for (const naturalGroup of new_naturalGroups) {
         const isInAnyGrouping = resultGroups.some(g =>
             g.elements.some(el => naturalGroup.includes(el))
         );

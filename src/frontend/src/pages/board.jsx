@@ -20,6 +20,7 @@ import { boardStore } from "../stores/boardStore";
 const Board = observer(({ title }) => {
 	const { boardId } = useParams(); // Получаем ID доски из URL
 	const [selectedColor, setSelectedColor] = useState('#e55039');
+	const [showTextExport, setShowTextExport] = useState(true);
 	const [isSpacePressed, setIsSpacePressed] = useState(false);
 	const [selectedTool, setSelectedTool] = useState(null);
 	const [tempElement, setTempElement] = useState(null);
@@ -329,8 +330,7 @@ const Board = observer(({ title }) => {
 		console.log(groups.filter(sas => sas.type === 'grouping'))
 		// Собираем все элементы для документа
 		const docChildren = [];
-
-		// Обрабатываем каждую группу
+		setShowTextExport(false)
 		for (const group of groups.filter(sas => sas.type === 'grouping')) {
 			console.log(group)
 			docChildren.push(
@@ -340,9 +340,23 @@ const Board = observer(({ title }) => {
 					alignment: AlignmentType.CENTER,
 				})
 			);
-
+			console.log(group.elements)
 			for (const elem of group.elements) {
 				console.log(elem)
+				const hasText = elem.some(
+					inv => inv.exportAsText
+				);
+				if (hasText) {
+					for (const textElement of elem) {
+						docChildren.push(
+							new Paragraph({
+								text: textElement.text,
+								alignment: AlignmentType.LEFT,
+							})
+						);
+					}
+					continue
+				}
 
 				// Получаем границы группы
 				const dimensions = utils_export.getGroupBoundingBox(elem);
@@ -391,6 +405,8 @@ const Board = observer(({ title }) => {
 		const ungrouped = groups.filter(group => group.type === 'natural');
 		console.log(ungrouped)
 		if (ungrouped) {
+			console.log("ungrouped")
+			console.log(ungrouped)
 			docChildren.push(
 				new Paragraph({
 					text: "Остальные",
@@ -399,6 +415,20 @@ const Board = observer(({ title }) => {
 				})
 			);
 			for (const group of ungrouped) {
+				const hasText = group.elements.some(
+					inv => inv.exportAsText
+				);
+				if (hasText) {
+					for (const textElement of group.elements) {
+						docChildren.push(
+							new Paragraph({
+								text: textElement.text,
+								alignment: AlignmentType.LEFT,
+							})
+						);
+					}
+					continue
+				}
 				const dimensions = utils_export.getGroupBoundingBox(group.elements);
 
 				// Создаем изображение группы
@@ -457,6 +487,19 @@ const Board = observer(({ title }) => {
 							},
 						},
 					},
+					document: {
+						paragraph: {
+							spacing: {
+								line: 360,
+							},
+						},
+						run: {
+							size: 32,
+							font: "Times New Roman",
+						},
+					},
+
+
 				},
 			},
 			sections: [{
@@ -476,6 +519,12 @@ const Board = observer(({ title }) => {
 		link.click();
 		document.body.removeChild(link);
 		URL.revokeObjectURL(url);
+		setShowTextExport(true)
+		// for (const group of groups) {
+		// 	for (const elem of group.elements.flat()) {
+		// 		elem.show()
+		// 	}
+		// }
 	};
 	const handleContextMenu = (e) => {
 		console.log(e.target);
@@ -967,7 +1016,7 @@ const Board = observer(({ title }) => {
 							null
 					)}
 					{elements.map((element) =>
-						element.type === "text" ? (
+						element.type === "text" && (showTextExport || !element.exportAsText) ? (
 							<EditableText key={element.id} element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} transformerRef={transformerRef} onUpdateElement={handleUpdateElement} />
 						) : element.type === "rect" ? (
 							<RectangleElement key={element.id} element={element} onDragEnd={handleDragEnd} onDragStart={handleDragStart} rectRefs={rectRefs} />
