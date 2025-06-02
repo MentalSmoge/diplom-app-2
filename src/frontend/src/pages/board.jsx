@@ -621,7 +621,7 @@ const Board = observer(({ title }) => {
 				x: pos.x,
 				y: pos.y,
 				text: 'New Text',
-				fill: selectedColor ?? '#000000',
+				fill: selectedColor.hex ?? '#000000',
 				width: 100,
 				height: 40,
 				isDragging: false,
@@ -714,7 +714,7 @@ const Board = observer(({ title }) => {
 			isDragging: false,
 			onDragStart: handleDragStart,
 			onDragEnd: handleDragEnd,
-			fill: selectedColor,
+			fill: selectedColor.hex ?? '#000000',
 			stroke: '#2d3436',
 		});
 	};
