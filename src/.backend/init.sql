@@ -1,4 +1,3 @@
--- Сначала создаем последовательности
 CREATE SEQUENCE IF NOT EXISTS users_id_seq
     INCREMENT 1
     START 1
@@ -26,8 +25,14 @@ CREATE SEQUENCE IF NOT EXISTS project_users_id_seq
     MINVALUE 1
     MAXVALUE 2147483647
     CACHE 1;
+    CREATE SEQUENCE IF NOT EXISTS invitations_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
 
--- Затем создаем таблицы в правильном порядке зависимостей
+
 CREATE TABLE IF NOT EXISTS users
 (
     id integer NOT NULL DEFAULT nextval('users_id_seq'::regclass),
@@ -91,13 +96,32 @@ CREATE TABLE IF NOT EXISTS elements
         ON DELETE CASCADE
 ) TABLESPACE pg_default;
 
--- Связываем последовательности с таблицами
+CREATE TABLE IF NOT EXISTS invitations
+(
+    id integer NOT NULL DEFAULT nextval('invitations_id_seq'::regclass),
+    from_user_id integer NOT NULL,
+    to_user_email character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    project_id integer NOT NULL,
+    role integer NOT NULL,
+    status character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT 'pending',
+    created_at timestamp without time zone DEFAULT now(),
+    CONSTRAINT invitations_pkey PRIMARY KEY (id),
+    CONSTRAINT fk_from_user FOREIGN KEY (from_user_id)
+        REFERENCES users (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE,
+    CONSTRAINT fk_project FOREIGN KEY (project_id)
+        REFERENCES projects (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE
+) TABLESPACE pg_default;
+
+
 ALTER SEQUENCE users_id_seq OWNED BY users.id;
 ALTER SEQUENCE projects_id_seq OWNED BY projects.id;
 ALTER SEQUENCE boards_id_seq OWNED BY boards.id;
 ALTER SEQUENCE project_users_id_seq OWNED BY project_users.id;
 
--- Устанавливаем владельца для всех объектов
 ALTER TABLE users OWNER TO postgres;
 ALTER TABLE projects OWNER TO postgres;
 ALTER TABLE boards OWNER TO postgres;
@@ -107,3 +131,6 @@ ALTER SEQUENCE users_id_seq OWNER TO postgres;
 ALTER SEQUENCE projects_id_seq OWNER TO postgres;
 ALTER SEQUENCE boards_id_seq OWNER TO postgres;
 ALTER SEQUENCE project_users_id_seq OWNER TO postgres;
+ALTER SEQUENCE invitations_id_seq OWNED BY invitations.id;
+ALTER TABLE invitations OWNER TO postgres;
+ALTER SEQUENCE invitations_id_seq OWNER TO postgres;
