@@ -312,7 +312,12 @@ const Board = observer(({ title }) => {
 
 		return `${day}-${month}-${String(year).slice(-2)}_${hours}-${minutes}-${seconds}`;
 	};
+	function timeout(delay) {
+		return new Promise(res => setTimeout(res, delay));
+	}
 	const handleExport = async () => {
+		setShowTextExport(false)
+		await timeout(100);
 		const stage = stageRef.current;
 		stage.scale({ x: 1, y: 1 });
 
@@ -330,7 +335,6 @@ const Board = observer(({ title }) => {
 		console.log(groups.filter(sas => sas.type === 'grouping'))
 		// Собираем все элементы для документа
 		const docChildren = [];
-		setShowTextExport(false)
 		for (const group of groups.filter(sas => sas.type === 'grouping')) {
 			console.log(group)
 			docChildren.push(
@@ -343,19 +347,21 @@ const Board = observer(({ title }) => {
 			console.log(group.elements)
 			for (const elem of group.elements) {
 				console.log(elem)
-				const hasText = elem.some(
-					inv => inv.exportAsText
-				);
+				const hasText = elem.some(inv => inv.exportAsText);
 				if (hasText) {
 					for (const textElement of elem) {
-						docChildren.push(
-							new Paragraph({
-								text: textElement.text,
-								alignment: AlignmentType.LEFT,
-							})
-						);
+						const lines = textElement.text.split('\n');
+						for (const line of lines) {
+							docChildren.push(
+								new Paragraph({
+									text: line,
+									alignment: AlignmentType.LEFT,
+								})
+							);
+						}
+						// docChildren.push(new Paragraph({}));
 					}
-					continue
+					continue;
 				}
 
 				// Получаем границы группы
@@ -420,14 +426,18 @@ const Board = observer(({ title }) => {
 				);
 				if (hasText) {
 					for (const textElement of group.elements) {
-						docChildren.push(
-							new Paragraph({
-								text: textElement.text,
-								alignment: AlignmentType.LEFT,
-							})
-						);
+						const lines = textElement.text.split('\n');
+						for (const line of lines) {
+							docChildren.push(
+								new Paragraph({
+									text: line,
+									alignment: AlignmentType.LEFT,
+								})
+							);
+						}
+						// docChildren.push(new Paragraph({}));
 					}
-					continue
+					continue;
 				}
 				const dimensions = utils_export.getGroupBoundingBox(group.elements);
 
@@ -665,7 +675,7 @@ const Board = observer(({ title }) => {
 				y_start: pos.y,
 				x_end: pos.x,
 				y_end: pos.y,
-				fill: selectedColor ?? '#000000',
+				fill: selectedColor.hex ?? selectedColor,
 				isDragging: false,
 				onDragStart: handleDragStart,
 				onDragEnd: handleDragEnd,
@@ -1030,7 +1040,7 @@ const Board = observer(({ title }) => {
 			>
 				<Layer>
 
-					{elements.map((element) =>
+					{showTextExport && elements.map((element) =>
 						element.type === "grouping" ? (
 							<Grouping
 								key={element.id}
