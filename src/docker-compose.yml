@@ -1,5 +1,5 @@
 version: '3.3'
-name: "monolith"
+# name: "monolith"
 services:
     frontend:
         image: mentalsmoge/frontend:latest
@@ -12,11 +12,11 @@ services:
             - ./frontend:/app_frontend
             - /app_frontend/node_modules
         ports:
-            - "3000:5173" # Доступно извне
+            - "3000:5173"
         depends_on:
             - backend
         networks:
-            - external-network # Только внешняя сеть
+            - external-network
         command: sh -c "npm install && npm run dev"
     # redis:
     #     container_name: monolith_redis
@@ -98,8 +98,8 @@ volumes:
 networks:
     internal-network:
         driver: bridge
-        internal: true # Полностью изолированная сеть
+        internal: true
 
     external-network:
         driver: bridge
-        internal: false # Доступна извне
+        internal: false
