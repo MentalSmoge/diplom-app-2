@@ -1,4 +1,4 @@
-import { Stage, Layer, Text, Transformer, Group } from 'react-konva';
+import { Stage, Layer, Text, Transformer, Group, Rect } from 'react-konva';
 import { Html } from 'react-konva-utils';
 import { useEffect, useRef, useState, useCallback, useLayoutEffect } from 'react';
 
@@ -74,6 +74,7 @@ const EditableText = ({
 }) => {
     const [text, setText] = useState(element.text);
     const [isEditing, setIsEditing] = useState(false);
+    const [isMoving, setIsMoving] = useState(false);
     const [textWidth, setTextWidth] = useState(200);
     const textRef = useRef();
     useEffect(() => {
@@ -109,17 +110,32 @@ const EditableText = ({
             width: newWidth,
             scaleX: 1,
         });
-        // console.log(node.width(), scaleX, newWidth)
     }, []);
 
     return (
-        // <Stage width={window.innerWidth} height={window.innerHeight}>
         <>
+            <Rect
+                x={element.x - 5}
+                y={element.y - 5}
+                width={textWidth}
+                height={textRef.current + 10 ? textRef.current.height() + 10 : 30 + 10}
+                stroke="red"
+                strokeWidth={2}
+                dash={[5, 3]}
+                cornerRadius={5}
+                visible={!isMoving && element.exportAsText}
+            />
             <Text
                 draggable={draggable}
                 fill={element.fill}
-                onDragStart={onDragStart}
-                onDragEnd={onDragEnd}
+                onDragStart={(e) => {
+                    setIsMoving(true)
+                    onDragStart(e)
+                }}
+                onDragEnd={(e) => {
+                    setIsMoving(false)
+                    onDragEnd(e)
+                }}
                 id={element.id}
                 name='selectable'
                 // ref={textRef}
@@ -138,7 +154,6 @@ const EditableText = ({
                         textRef.current = node
                     }
                 }}
-            // onTransform={() => { console.log("SAS") }}
             />
             {isEditing && (
                 <TextEditor
@@ -151,39 +166,7 @@ const EditableText = ({
                 />
             )}
         </>
-        // <Group
-        //     draggable
-        //     id={element.id}
-        //     name='selectable'
-        //     x={element.x}
-        //     y={element.y}
-        //     rotation={element.rotation}
-        //     height={element.height}
-        //     width={element.width}
-        //     onDragStart={onDragStart}
-        //     onDragEnd={onDragEnd}
-        //     ref={groupNode => {
-        //         if (groupNode) {
-        //             rectRefs.current.set(element.id, groupNode);
-        //             groupRef.current = groupNode
-        //         }
-        //     }}
-        //     onTransform={handleTransform}
-        // >
 
-        //     {/* {!isEditing && (
-        //         <Transformer
-        //             ref={trRef}
-        //             rotateEnabled={false}
-        //             enabledAnchors={['middle-left', 'middle-right']}
-        //             boundBoxFunc={(oldBox, newBox) => ({
-        //                 ...newBox,
-        //                 width: Math.max(30, newBox.width),
-        //             })}
-        //         />
-        //     )} */}
-        // </Group >
-        // </Stage>
     );
 };
 

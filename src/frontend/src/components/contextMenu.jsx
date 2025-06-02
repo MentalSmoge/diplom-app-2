@@ -10,7 +10,10 @@ const ContextMenu = ({
     onDelete,
     showColorPicker,
     showDelete,
-    onClose
+    onClose,
+    showExportToggle,
+    exportAsText,
+    onToggleExportAsText
 }) => {
     const handleClick = (e) => {
         e.stopPropagation();
@@ -57,6 +60,16 @@ const ContextMenu = ({
                     style={{ boxShadow: 'none' }}
                     width={'200px'}
                 />}
+            {showExportToggle && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <label>Export as Text:</label>
+                    <input
+                        type="checkbox"
+                        checked={exportAsText}
+                        onChange={onToggleExportAsText}
+                    />
+                </div>
+            )}
             {showDelete &&
                 <button
                     style={{

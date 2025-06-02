@@ -340,6 +340,7 @@ const Board = observer(({ title }) => {
 					alignment: AlignmentType.CENTER,
 				})
 			);
+
 			for (const elem of group.elements) {
 				console.log(elem)
 
@@ -567,6 +568,7 @@ const Board = observer(({ title }) => {
 				isDragging: false,
 				onDragStart: handleDragStart,
 				onDragEnd: handleDragEnd,
+				exportAsText: true
 			};
 			handleCreateElement(newElement);
 			setSelectedTool(null);
@@ -812,6 +814,7 @@ const Board = observer(({ title }) => {
 					height: 40,
 					fill: '#000000',
 					isDragging: false,
+					exportAsText: true
 				};
 				console.log("Created text element from file:", newElement);
 				handleCreateElement(newElement);
@@ -1056,6 +1059,22 @@ const Board = observer(({ title }) => {
 					showColorPicker={showColorPicker}
 					showDelete={showDelete}
 					onClose={() => setShowMenu(false)}
+					showExportToggle={selectedId && elements.find(el => el.id === selectedId)?.type === 'text'}
+					exportAsText={selectedId ? elements.find(el => el.id === selectedId)?.exportAsText : false}
+					onToggleExportAsText={() => {
+						const updatedElements = elements.map(element => {
+							if (element.id === selectedId) {
+								const updatedElement = {
+									...element,
+									exportAsText: !element.exportAsText
+								};
+								handleUpdateElement(updatedElement);
+								return updatedElement;
+							}
+							return element;
+						});
+						setElements(updatedElements);
+					}}
 				/>
 			)}
 		</div>

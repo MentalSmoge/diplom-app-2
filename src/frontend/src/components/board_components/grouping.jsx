@@ -84,12 +84,13 @@ export const Grouping = ({
             <EditableText
                 element={{
                     ...element,
-                    x: 10, // Небольшой отступ от края
+                    x: 10,
                     y: 10,
                     fill: 'black',
-                    width: element.width - 20, // Ширина текста с учетом отступов
+                    width: element.width - 20,
                     text: element.text || 'Text',
-                    draggable: false // Запрещаем перемещение текста отдельно
+                    draggable: false,
+                    exportAsText: false
                 }}
                 onDragStart={() => { }}
                 onDragEnd={() => { }}
