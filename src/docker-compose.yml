@@ -18,15 +18,15 @@ services:
         networks:
             - external-network # Только внешняя сеть
         command: sh -c "npm install && npm run dev"
-    redis:
-        container_name: monolith_redis
-        image: redis:alpine
-        ports:
-            - "6379:6379"
-        volumes:
-            - redis_data:/data
-        networks:
-            - internal-network
+    # redis:
+    #     container_name: monolith_redis
+    #     image: redis:alpine
+    #     ports:
+    #         - "6379:6379"
+    #     volumes:
+    #         - redis_data:/data
+    #     networks:
+    #         - internal-network
     backend:
         image: mentalsmoge/backend:latest
         container_name: monolith_backend
@@ -65,34 +65,34 @@ services:
             - internal-network # Только внутренняя сеть
         expose:
             - "5432" # Только для внутреннего использования
-    pgadmin:
-        container_name: monolith_pgadmin_container
-        image: dpage/pgadmin4:9
-        environment:
-            PGADMIN_DEFAULT_EMAIL: "mentalsmoge@gmail.com"
-            PGADMIN_DEFAULT_PASSWORD: ${DB_PASSWORD}
-            PGADMIN_CONFIG_SERVER_MODE: "False"
-        depends_on:
-            - user_db
-        volumes:
-            - pgadmin-data:/var/lib/pgadmin
-        ports:
-            - "5050:80"
-        restart: unless-stopped
-        deploy:
-            resources:
-                limits:
-                    cpus: "0.5"
-                    memory: 1G
-        networks:
-            - internal-network # Внутренняя сеть для БД
-            - external-network # Внешняя сеть для фронтенда
+    # pgadmin:
+    #     container_name: monolith_pgadmin_container
+    #     image: dpage/pgadmin4:9
+    #     environment:
+    #         PGADMIN_DEFAULT_EMAIL: "mentalsmoge@gmail.com"
+    #         PGADMIN_DEFAULT_PASSWORD: ${DB_PASSWORD}
+    #         PGADMIN_CONFIG_SERVER_MODE: "False"
+    #     depends_on:
+    #         - user_db
+    #     volumes:
+    #         - pgadmin-data:/var/lib/pgadmin
+    #     ports:
+    #         - "5050:80"
+    #     restart: unless-stopped
+    #     deploy:
+    #         resources:
+    #             limits:
+    #                 cpus: "0.5"
+    #                 memory: 1G
+    #     networks:
+    #         - internal-network # Внутренняя сеть для БД
+    #         - external-network # Внешняя сеть для фронтенда
 
 volumes:
     postgres-data:
     images_volume:
-    pgadmin-data:
-    redis_data:
+        # pgadmin-data:
+        # redis_data:
 
 
 networks:
