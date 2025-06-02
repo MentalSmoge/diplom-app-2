@@ -916,7 +916,7 @@ const Board = observer(({ title }) => {
 				const formData = new FormData();
 				formData.append('image', file);
 
-				const response = await fetch('http://localhost:8080/upload', {
+				const response = await fetch('http://45.143.92.185:8080/upload', {
 					method: 'POST',
 					body: formData,
 					credentials: 'include',

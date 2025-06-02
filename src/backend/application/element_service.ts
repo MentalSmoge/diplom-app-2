@@ -48,7 +48,7 @@ export class ElementService {
             try {
                 // @ts-ignore
                 const filename = existingElement.imageUrl.split('/').pop();
-                await axios.delete(`http://localhost:8080/delete/${filename}`);
+                await axios.delete(`http://45.143.92.185:8080/delete/${filename}`);
             } catch (error) {
                 console.error('Failed to delete image file:', error);
             }

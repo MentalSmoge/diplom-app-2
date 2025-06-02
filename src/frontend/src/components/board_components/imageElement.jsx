@@ -5,7 +5,7 @@ import useImage from 'use-image';
 
 const ImageElement = ({ element, onDragStart, onDragEnd, rectRefs }) => {
     const imageRef = useRef();
-    const [image, status] = useImage(`http://localhost:8080${element.imageUrl}`, 'Anonymous');
+    const [image, status] = useImage(`http://45.143.92.185:8080${element.imageUrl}`, 'Anonymous');
     const [hasError, setHasError] = useState(false);
 
     useEffect(() => {

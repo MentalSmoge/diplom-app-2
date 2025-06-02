@@ -37,7 +37,7 @@ function Projects() {
             return isAuthenticated.data
         };
 
-        verifyAuth().then((data) => fetch(`http://localhost:8080/projects/${data.id}`))
+        verifyAuth().then((data) => fetch(`http://45.143.92.185:8080/projects/${data.id}`))
             .then((response) => { return response.json() })
             .then((data) => { console.log(data); ProjectsStore.setProjects(data) })
             .catch((error) => console.error("Error fetching Projects:", error));

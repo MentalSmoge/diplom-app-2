@@ -27,7 +27,7 @@ class InviteModalStore {
                 throw new Error('Not authenticated');
             }
 
-            const response = await fetch(`http://localhost:8080/projects/${this.projectId}/invite`, {
+            const response = await fetch(`http://45.143.92.185:8080/projects/${this.projectId}/invite`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

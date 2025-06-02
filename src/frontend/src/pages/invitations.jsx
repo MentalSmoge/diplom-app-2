@@ -19,7 +19,7 @@ function Invitations() {
                 }
                 console.log(authData)
 
-                const response = await fetch(`http://localhost:8080/invitations`, {
+                const response = await fetch(`http://45.143.92.185:8080/invitations`, {
                     method: 'GET',
                     credentials: 'include',
                     headers: {
@@ -44,7 +44,7 @@ function Invitations() {
             const authData = await checkAuth();
             if (!authData) return;
 
-            const response = await fetch(`http://localhost:8080/invitations/${invitationId}/respond`, {
+            const response = await fetch(`http://45.143.92.185:8080/invitations/${invitationId}/respond`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

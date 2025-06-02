@@ -25,7 +25,7 @@ class DeleteModalStore {
       case "Project":
         {
           console.log(this.currentId)
-          const response = await fetch(`http://localhost:8080/project/${this.currentId}`, {
+          const response = await fetch(`http://45.143.92.185:8080/project/${this.currentId}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json',
@@ -41,7 +41,7 @@ class DeleteModalStore {
       case "Board":
         {
           console.log(this.currentId, user_id)
-          const response = await fetch(`http://localhost:8080/boards/${this.currentId}`, {
+          const response = await fetch(`http://45.143.92.185:8080/boards/${this.currentId}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json',

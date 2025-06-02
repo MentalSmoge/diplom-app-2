@@ -8,7 +8,7 @@ export const Header = observer(() => {
     const navigate = useNavigate();
 
     const handleLogout = async () => {
-        const response = await fetch('http://localhost:8080/logout', {
+        const response = await fetch('http://45.143.92.185:8080/logout', {
             method: 'POST',
             credentials: 'include',
         });

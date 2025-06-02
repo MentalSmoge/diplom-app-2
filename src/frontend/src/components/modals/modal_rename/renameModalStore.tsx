@@ -40,7 +40,7 @@ class RenameModalStore {
       case "Project":
         {
           console.log(this.currentId)
-          const response = await fetch(`http://localhost:8080/project/${this.currentId}`, {
+          const response = await fetch(`http://45.143.92.185:8080/project/${this.currentId}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ class RenameModalStore {
       case "Board":
         {
           console.log(this.currentId, user_id)
-          const response = await fetch(`http://localhost:8080/boards/${this.currentId}`, {
+          const response = await fetch(`http://45.143.92.185:8080/boards/${this.currentId}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',

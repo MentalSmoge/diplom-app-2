@@ -36,7 +36,7 @@ function Boards() {
             return isAuthenticated.data
         };
 
-        verifyAuth().then((data) => fetch(`http://localhost:8080/boards/${projectId}?userId=${data.id}`))
+        verifyAuth().then((data) => fetch(`http://45.143.92.185:8080/boards/${projectId}?userId=${data.id}`))
             .then((response) => response.json())
             .then((data) => { console.log(data); BoardsStore.setBoards(data) })
             .catch((error) => console.error("Error fetching Boards:", error));
