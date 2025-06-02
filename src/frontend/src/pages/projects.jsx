@@ -7,6 +7,7 @@ import AddProjectModalStore from '../components/modals/modal_addProject/store_ad
 import ProjectsStore from "./store_projects"
 import DeleteModal from "../components/modals/modal_delete"
 import DeleteModalStore from "../components/modals/modal_delete/DeleteModalStore"
+import RenameModal from "../components/modals/modal_rename"
 import InviteModal from "../components/modals/modal_invite";
 import { observer } from 'mobx-react-lite';
 
@@ -46,6 +47,7 @@ function Projects() {
         <div className="projects-container">
             <AddProjectModal />
             <DeleteModal type="Project" />
+            <RenameModal type="Project" showDesc={true} />
             <InviteModal />
             <div className="projects-header">
                 <h2 className="projects-title">Проекты</h2>

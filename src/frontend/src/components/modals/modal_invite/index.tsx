@@ -14,17 +14,17 @@ const InviteModal = observer(() => {
         >
             <h2 className='header'>Пригласить пользователя</h2>
 
-            <div className="input-group">
-                <p className='p'>Email пользователя</p>
-                <input
-                    autoFocus
-                    className="input"
-                    type="email"
-                    value={InviteModalStore.email}
-                    onChange={e => InviteModalStore.setEmail(e.target.value)}
-                    placeholder="Введите email пользователя"
-                />
-            </div>
+            {/* <div className="input-group"> */}
+            <p className='p'>Email пользователя</p>
+            <input
+                autoFocus
+                className="input"
+                type="email"
+                value={InviteModalStore.email}
+                onChange={e => InviteModalStore.setEmail(e.target.value)}
+                placeholder="Введите email пользователя"
+            />
+            {/* </div> */}
 
             {/* <div className="input-group">
                 <p className='p'>Роль в проекте</p>

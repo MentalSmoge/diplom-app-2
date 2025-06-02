@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import ProjectCard from "../components/projectCard";
 import AddBoardModal from "../components/modals/modal_addBoard"
 import AddBoardModalStore from "../components/modals/modal_addBoard/store_addBoard"
+import RenameModal from "../components/modals/modal_rename"
 import BoardsStore from "./store_boards"
 import DeleteModal from "../components/modals/modal_delete"
 import DeleteModalStore from "../components/modals/modal_delete/DeleteModalStore"
@@ -45,8 +46,9 @@ function Boards() {
         <div className="projects-container">
             <AddBoardModal projectId={projectId} />
             <DeleteModal type="Board" />
+            <RenameModal type="Board" />
 
-            <DeleteModal type="Project" />
+            {/* <DeleteModal type="Project" /> */}
             <div className="projects-header">
                 <h2 className="projects-title">Доски в проекте</h2>
                 <button className="create-project-btn" onClick={() => handleCreateButton()}>
@@ -61,6 +63,7 @@ function Boards() {
                         onOpen={() => handleBoardButton(project.id, project.title)}
                         onDelete={() => handleDeleteButton(project.id)}
                         key={project.id}
+                        boardId={project.id}
                     />
                 ))}
             </div>

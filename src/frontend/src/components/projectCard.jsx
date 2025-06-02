@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import './projectCard.css';
 import InviteModalStore from './modals/modal_invite/store_invite';
+import renameModalStore from './modals/modal_rename/renameModalStore';
 
-const ProjectCard = ({ title, description, onOpen, onDelete, projectId }) => {
+const ProjectCard = ({ title, description, onOpen, onDelete, projectId, boardId }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => {
@@ -13,6 +14,17 @@ const ProjectCard = ({ title, description, onOpen, onDelete, projectId }) => {
         InviteModalStore.setProjectId(projectId)
         console.log(projectId)
         InviteModalStore.openModal(projectId);
+        setIsMenuOpen(false);
+    };
+    const handleRenameClick = () => {
+        // renameModalStore.setProjectId(projectId)
+        // console.log(projectId)
+        if (boardId) {
+            renameModalStore.openEditor("Board", boardId);
+        }
+        else {
+            renameModalStore.openEditor("Project", projectId);
+        }
         setIsMenuOpen(false);
     };
 
@@ -26,11 +38,12 @@ const ProjectCard = ({ title, description, onOpen, onDelete, projectId }) => {
                     </button>
                     {isMenuOpen && (
                         <div className="dropdown-menu">
-                            <button className="dropdown-item" onClick={handleInviteClick}>
-                                Пригласить
-                            </button>
-                            <button className="dropdown-item">Редактировать</button>
-                            <button className="dropdown-item">Копировать</button>
+                            {projectId &&
+                                <button className="dropdown-item" onClick={handleInviteClick}>
+                                    Пригласить
+                                </button>
+                            }
+                            <button className="dropdown-item" onClick={handleRenameClick}>Редактировать</button>
                         </div>
                     )}
                 </div>
