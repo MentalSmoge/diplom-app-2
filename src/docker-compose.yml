@@ -90,9 +90,8 @@ services:
 
 volumes:
     postgres-data:
-    images_volume:
-        # pgadmin-data:
-        # redis_data:
+    images_volume: # pgadmin-data:
+    redis_data:
 
 
 networks:
